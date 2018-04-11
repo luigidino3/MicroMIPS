@@ -34,7 +34,7 @@ class MemoryClearer(models.Model):
 class IF(models.Model):
 	cycle = models.IntegerField(default=0)
 	row = models.IntegerField(blank=True, null=True, max_length=16)
-	npc = models.CharField(blank=True, null=True, max_length=16)
+	ir = models.CharField(blank=True, null=True, max_length=16)
 	pc = models.CharField(blank=True, null=True, max_length=16)
 	
 	def __int__(self):
