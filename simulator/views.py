@@ -1,6 +1,298 @@
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from .models import Register, DataSegment, MipsProgram, MemoryClearer, IF, ID, EX, MEM, WB
+import re
+
+def opcode():
+    #syntaxCheck = re.match(checker,code)
+    syntaxCheck = True
+    if syntaxCheck:
+        #print ("Goods")
+        if re.search(r'DADDIU',code):
+            #print("NICE DADDIU NAKITA")
+            opcode = '011001'
+            rt,rs,imm = immediateChecker(code)
+            rt,rs,imm = cleaner(rt,rs,imm)
+
+            rtbin = '{0:05b}'.format(int(rt))
+            rsbin = '{0:05b}'.format(int(rs))
+
+
+            final = opcode + rsbin + rtbin
+            final = hex(int(final,2))
+
+            #print("OPCODE in hex: "+final+imm)
+            final = final + imm
+            print("OPCODE in hex: "+'0x' + final[2:].zfill(8))
+
+        elif re.search(r'XORI',code):
+            #print("XORI")
+            opcode = '001110'
+            rt,rs,imm = immediateChecker(code)
+            rt,rs,imm = cleaner(rt,rs,imm)
+
+            '''
+            print("THIS IS RT: "+rt) #5
+            print("THIS IS RS: "+rs) #5
+            print("THIS IS IMM: "+imm) #16
+            '''
+
+            rtbin = '{0:05b}'.format(int(rt))
+            rsbin = '{0:05b}'.format(int(rs))
+
+
+            final = opcode + rsbin + rtbin
+            final = hex(int(final,2))
+
+            #print("OPCODE in hex: "+final+imm)
+            final = final + imm
+            print("OPCODE in hex: "+'0x' + final[2:].zfill(8))
+
+
+        elif re.search(r'DADDU',code):
+            #print("DADDU")
+            opcode = '000000'
+            sa = '00000'
+            func = '101101'
+            rd,rs,rt = nonImmediateChecker(code)
+            rt,rs,rd = cleaner(rt,rs,rd)
+            #print(rs)
+            #print(rt)
+
+            rtbin = '{0:05b}'.format(int(rt))
+            rsbin = '{0:05b}'.format(int(rs))
+            rdbin = '{0:05b}'.format(int(rd))
+
+            final = opcode + rsbin + rtbin + rdbin + sa + func
+            #print(final)
+            final = hex(int(final,2))
+
+            #print("OPCODE in hex: "+final)
+            print("OPCODE in hex: "+'0x' + final[2:].zfill(8))
+
+        elif re.search(r'SLT',code):
+            #print("DADDU")
+            opcode = '000000'
+            sa = '00000'
+            func = '101010'
+            rd,rs,rt = nonImmediateChecker(code)
+            rt,rs,rd = cleaner(rt,rs,rd)
+            #print(rs)
+            #print(rt)
+
+            rtbin = '{0:05b}'.format(int(rt))
+            rsbin = '{0:05b}'.format(int(rs))
+            rdbin = '{0:05b}'.format(int(rd))
+
+            final = opcode + rsbin + rtbin + rdbin + sa + func
+            #print(final)
+            final = hex(int(final,2))
+
+            #print("OPCODE in hex: "+final)
+            print("OPCODE in hex: "+'0x' + final[2:].zfill(8))
+
+        elif re.search(r'SD',code):
+            #print("SD")
+            opcode = '111111'
+            rt,offset,base = loadstoreChecker(code)
+            rt,offset,base = loadstoreCleaner(rt,offset,base)
+
+            #rint(rt)
+            #print(offset)
+            #print(base)
+
+            rtbin = '{0:05b}'.format(int(rt))
+            basebin = '{0:05b}'.format(int(base))
+
+            final = opcode + basebin + rtbin
+
+            final = hex(int(final,2))
+
+            final = final + offset
+
+            print("OPCODE in hex: "+'0x' + final[2:].zfill(8))
+
+        elif re.search(r'LD',code):
+            opcode = '110111'
+            rt,offset,base = loadstoreChecker(code)
+            rt,offset,base = loadstoreCleaner(rt,offset,base)
+
+            #rint(rt)
+            #print(offset)
+            #print(base)
+
+            rtbin = '{0:05b}'.format(int(rt))
+            basebin = '{0:05b}'.format(int(base))
+
+            final = opcode + basebin + rtbin
+
+            final = hex(int(final,2))
+
+            final = final + offset
+
+            print("OPCODE in hex: "+'0x' + final[2:].zfill(8))
+
+        elif re.search(r'BGTZ',code):
+            print("BGTZ")
+            opcode = '000111'
+            rt = '00000'
+
+            rs = bcCleaner(code)
+            rs = rs.rstrip(',')
+            rs = rs.strip()
+            print(rs)
+            final = opcode + rs + rt
+
+            final = hex(int(final,2))
+            print(final)
+            print("OPCODE in hex: " + '0x'+final[2:].zfill(4)+" + 4 bytes of offset ")
+        elif re.search(r'BC',code):
+            opcode = '110010'
+
+            print("OPCODE in Binary: " + opcode + "26-bit offset")
+    else:
+       print ("Syntax error!")
+
+def immediateChecker(code):
+    count = 0
+    rt = ""
+    rs = ""
+    imm = ""
+    for i in range(len(code)):
+        if code[i] == 'r' and count == 0:
+            j = i
+            while code[j] != ',':
+                rt+=code[j+1]
+                j+=1
+
+            count+=1
+            #print(rt)
+        elif code[i] == 'r' and count != 0:
+            j = i
+            while code[j] != ',':
+                rs+=code[j+1]
+                j+=1
+
+            count+=1
+            #print(rs)
+        elif code[i] == '#' and count !=0:
+            j = i
+            ctr = 0
+            while ctr != 4:
+                imm = imm + code[j+1]
+                j+=1
+                ctr+=1
+            #print(imm)
+    return rt,rs,imm
+
+def nonImmediateChecker(code):
+    count = 0
+    rt = ""
+    rs = ""
+    rd = ""
+
+    for i in range(len(code)):
+        if code[i] == 'r' and count == 0:
+            j = i
+            while code[j] != ',':
+                rd+=code[j+1]
+                j+=1
+            count+=1
+            #print(rd)
+
+        elif code[i] == 'r' and count == 1:
+            j = i
+            while code[j] != ',':
+                rs+=code[j+1]
+                j+=1
+            count+=1
+            #print(rs)
+
+        elif code[i] == 'r' and count == 2:
+            try:
+                j = i
+                ctr = 0
+                while ctr != 2:
+                    rt = rt + code[j+1]
+                    j+=1
+                    ctr+=1
+
+            except IndexError:
+                j = i
+                ctr = 0
+                rt = ""
+                while ctr != 1:
+                    rt = rt + code[j+1]
+                    j+=1
+                    ctr+=1
+            #print(rt)
+    return rd,rs,rt
+
+def bcCleaner(code):
+    count = 0
+    rs = ""
+
+    for i in range(len(code)):
+        if code[i] == 'r' and count == 0:
+            j = i
+            while code[j] != ',':
+                rs+=code[j+1]
+                j+=1
+            count+=1
+
+    return rs
+def loadstoreChecker(code):
+    count = 0
+    rt = ""
+    base = ""
+    offset = ""
+
+    for i in range(len(code)):
+        if code[i] == 'r' and count == 0:
+            j = i
+            while code[j] != ',':
+                rt+=code[j+1]
+                j+=1
+            count+=1
+            #print(rt)
+        elif code[i] == ',' and count == 1:
+            j = i
+            while code[j] != '(':
+                offset += code[j+1]
+                j+=1
+
+            count+=1
+            #print(offset)
+        elif code[i] == '(' and count == 2:
+            j = i
+            while code[j] != ')':
+                base += code[j+1]
+                j+=1
+            count+=1
+            #print(base)
+
+    return rt,offset,base
+
+def loadstoreCleaner(rt,offset,base):
+    rt = rt.rstrip(',')
+    rt = rt.strip()
+    offset = offset.rstrip('(')
+    offset = offset.strip()
+    base = base.rstrip(')')
+    base = base.lstrip('r')
+    base = base.strip()
+
+    return rt,offset,base
+
+def cleaner(rt,rs,imm):
+    rt = rt.rstrip(',')
+    rt = rt.strip()
+    rs = rs.rstrip(',')
+    rs = rs.strip()
+    imm = imm.rstrip(',')
+    imm = imm.strip()
+
+    return rt,rs,imm
 
 
 
@@ -175,6 +467,7 @@ def programRegistered(request):
     x = 0
     for y in programMemory:
         y.value = programLines[x]
+
         y.save()
         newClearer = MemoryClearer(name=y.name, memoryType=1)
         newClearer.save()
