@@ -12,6 +12,7 @@ class Register(models.Model):
     
 class DataSegment(models.Model): #512
     name = models.IntegerField(default=0)
+    nameHex = models.CharField(blank=True, null=True,max_length=4)
     value = models.CharField(blank=True, null=True, max_length=16)
     
     def __int__(self):
@@ -19,6 +20,7 @@ class DataSegment(models.Model): #512
     
 class MipsProgram(models.Model): #1024
     name = models.IntegerField(default=0)
+    nameHex = models.CharField(blank=True, null=True,max_length=4)
     value = models.CharField(blank=True, null=True, max_length=500)
     opcode = models.CharField(blank=True, null=True, max_length=10)
     def __int__(self):
@@ -102,10 +104,3 @@ class Table(models.Model):
     
     def __int__(self):
         return self.ROW
-
-class memoryComparer(models.Model):
-    nameInt = models.IntegerField(default=0)
-    nameHex = models.CharField(max_length=4)
-    
-    def __init__(self):
-        return self.nameHex

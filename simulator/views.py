@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
-from .models import Register, DataSegment, MipsProgram, MemoryClearer, IF, ID, EX, MEM, WB, Stall, Table, memoryComparer
+from .models import Register, DataSegment, MipsProgram, MemoryClearer, IF, ID, EX, MEM, WB, Stall, Table
 import re
 
 def immediateChecker(code):
@@ -941,6 +941,7 @@ def reset(request):
     VMEM = MEM.objects.all()
     VWB = WB.objects.all()
     VStall = Stall.objects.all()
+    VTable = Table.objects.all()
     for x in VIF:
         x.delete()
     for x in VID:
@@ -953,63 +954,9 @@ def reset(request):
         x.delete()
     for x in VStall:
         x.delete()
-    return render(request, 'simulator/home.html')
-#    for x in data:
-#        x.value = "0000000000000000"
-#        x.save()
-#    mips = MipsProgram.objects.all()
-#    for x in mips:
-#        x.value = "0000000000000000"
-#        x.save()
-#    while MemoryClearer.objects.count():
-#        MemoryClearer.objects.all()[0].delete()
-#    return render(request, 'simulator/home.html')
-#    memory = DataSegment.objects.all()    
-#    for x in memory:
-#        x.value = "00"
-#        x.save()
-#    y = 0
-#    a = 0
-#    b = 0
-#    c = 0
-#    first = 0
-#    second = 0
-#    third = 0
-#    while y < 4096:
-#        if a == 0:
-#            first = str(a)
-#        else:
-#            first = hex(a).lstrip("0x").upper()
-#        if b == 0:
-#            second = str(b)
-#        else:
-#            second = hex(b).lstrip("0x").upper()
-#        if c == 0:
-#            third = str(c)
-#        else:
-#            third = hex(c).lstrip("0x").upper()
-#            
-#        memoryname = "1" + third + second + first
-#        new_memory = MipsProgram(name=memoryname, value="00")
-#        new_memory.save()
-#        if a <= 14:
-#            a = a + 1
-#        elif b <=14 and a == 15:
-#            a = 0
-#            b = b + 1
-#        elif c <= 14 and b == 15 and a == 15:
-#            a = 0
-#            b = 0
-#            c = c + 1
-#        y = y + 1
-#    y = 0
-#    a = 0
-#    while y < 1024:
-#        new_memory = MipsProgram(name=a, value="0000000000000000")
-#        new_memory.save()
-#        a = a + 4
-#        y = y + 1
-    
+    for x in VTable:
+        x.delete()
+    return render(request, 'simulator/home.html')  
 
 def home(request):
     request.session['goto'] = 0
@@ -1079,8 +1026,6 @@ def changeDataMemory(request):
 
 def inputReg(request):
     request.session['goto'] = 0
-#    while MipsProgram.objects.count():
-#        MipsProgram.objects.all()[0].delete()
     firsthalf_registers = Register.objects.all()[:10]
     secondhalf_registers = Register.objects.all()[10:20]
     thirdhalf_registers = Register.objects.all()[20:]
@@ -1210,20 +1155,13 @@ def pipeline(request):
     for i in range(1, lastWB.cycle+1):
         listCycle.append(str(i))
     request.session['nextCycle'] = 1
-    mipsList = [["",""]]
-    first = 0
-    second = first + 1
-    '''
-    for x in programMips: 
-        mipsList[[first]].append(hex(x.name)[2:].zfill(4).upper())
-    '''
     context ={
         'table': all_table,
         'lastCycle': listCycle,
         'programMips':programMips, 
         'registers' : Register.objects.all(),
 		'datasegment' : DataSegment.objects.all(),
-        'mipsList': mipsList
+        'fullProgram': MipsProgram.objects.all(),
     }
     return render(request, 'simulator/pipeline.html', context)
 
@@ -1267,6 +1205,7 @@ def finish(request):
         'programMips':programMips, 
         'registers' : Register.objects.all(),
 		'datasegment' : DataSegment.objects.all(),
+        'fullProgram': MipsProgram.objects.all(),
     }
     return render(request, 'simulator/pipeline.html', context)
 
@@ -1284,5 +1223,6 @@ def nextCycle(request, nextCycle):
         'programMips':programMips, 
         'registers' : Register.objects.all(),
 		'datasegment' : DataSegment.objects.all(),
+        'fullProgram': MipsProgram.objects.all(),
     }
     return render(request, 'simulator/pipeline.html', context)

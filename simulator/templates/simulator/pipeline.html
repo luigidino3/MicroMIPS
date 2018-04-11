@@ -22,19 +22,19 @@
 
 <div id = "dataProgramRegTables">
 	<div id = "progtable">
+
 		<table id = "programtable">
 			<tr>
 				<th> Address </th>
 				<th> Code </th>
 			</tr>
-            <tr>
-            {% for mipsName in mipsList %}
-                <td style="visibility:visible;">{{ mipsName }}</td>
-            {% endfor %}
-			{% for mipsprogram in programMips %}
-				<td style="visibility:visible;"> {{ mipsprogram.value }} </td>
+			{% for mipsprogram in fullProgram %}
+                    <tr>
+                        <td style="visibility:visible;">{{ mipsprogram.nameHex }}</td>
+                        <td style="visibility:visible;"> {{ mipsprogram.value }} </td>    
+                    </tr>
 			{% endfor %}
-            </tr>
+            
 		</table>
 	</div>
 	
@@ -46,10 +46,10 @@
 			</tr>
 
 			{% for datasegment in datasegment %}
-				<tr>
-					<td style="visibility:visible;"> {{ datasegment.name }} </td>
-					<td style="visibility:visible;"> {{ datasegment.value }} </td>
-				</tr>
+                        <tr>
+                            <td style="visibility:visible;"> {{ datasegment.nameHex }} </td>
+                            <td style="visibility:visible;"> {{ datasegment.value }} </td>
+                        </tr>
 			{% endfor %}
 		</table>
 	</div>
