@@ -152,6 +152,7 @@ def opcode(code):
         if re.search(r'DADDIU',code):
             #print("NICE DADDIU NAKITA")
             opcode = '011001'
+            print(code)
             rt,rs,imm = immediateChecker(code)
             rt,rs,imm = cleaner(rt,rs,imm)
 
@@ -293,8 +294,9 @@ def opcode(code):
 
             final = hex(int(final,2))
             print(final)
-            print("OPCODE in hex: " + '0x'+final[2:].zfill(4)+" + 4 bytes of offset ")
+            print(final[2:].zfill(4)+" + 4 bytes of offset ")
             final2 = "n/a"
+
         elif re.search(r'BC',code):
             opcode = '110010'
             final2 = '0'
@@ -307,6 +309,7 @@ def opcode(code):
 
 
 def IFFunction(code):
+
     try:
         VIF = IF.objects.latest('id')
     except: 
@@ -315,6 +318,7 @@ def IFFunction(code):
         VStall = Stall.objects.latest('id')
     except: 
         VStall = None
+
     if VIF != None:
         IFcycle = 0
         IFrow = 0
@@ -333,6 +337,8 @@ def IFFunction(code):
         newIF.save()
 
 def IDFunction(code):
+    all_registers = Register.objects.all()
+
     try:
         VStall = Stall.objects.latest('id')
     except: 
@@ -341,60 +347,542 @@ def IDFunction(code):
         VID = ID.objects.latest('id')
     except: 
         VID = None
-    if VID != None:
-        if VStall != None:
-            if VStall.cycle > VID.cycle:
-                newID = ID(cycle=VStall.cycle+1, row=VStall.row)
-                newID.save()
+
+    if "DADDIU" in code.value:
+        rt,rs,imm = immediateChecker(code.value)
+        rt,rs,imm = cleaner(rt,rs,imm)
+
+        for register in all_registers:
+            if rt == register.name[1:]:
+                rt = register.value
+            if rs == register.name[1:]:
+                rs = register.value
+
+        if VID != None:
+            if VStall != None:
+                if VStall.cycle > VID.cycle:
+                    newID = ID(cycle=VStall.cycle+1, row=VStall.row,ir=code.opcode,a=rs.zfill(16),b=rt.zfill(16),imm=imm.zfill(16))
+                    newID.save()
+                else:
+                    newID = ID(cycle=VID.cycle+1, row=VID.row+1,ir=code.opcode,a=rs.zfill(16),b=rt.zfill(16),imm=imm.zfill(16))
+                    newID.save()
             else:
-                newID = ID(cycle=VID.cycle+1, row=VID.row+1)
+                newID = ID(cycle=VID.cycle+1, row=VID.row+1,ir=code.opcode,a=rs.zfill(16),b=rt.zfill(16),imm=imm.zfill(16))
                 newID.save()
-        else:
-            newID = ID(cycle=VID.cycle+1, row=VID.row+1)
+        else:        
+            newID = ID(cycle=2, row=1, ir=code.opcode,a=rs.zfill(16),b=rt.zfill(16),imm=imm.zfill(16))
             newID.save()
-    else:        
-        newID = ID(cycle=2, row=1)
-        newID.save()
+
+    elif "XORI" in code.value:
+        rt,rs,imm = immediateChecker(code.value)
+        rt,rs,imm = cleaner(rt,rs,imm)
+
+        for register in all_registers:
+            if rt == register.name[1:]:
+                rt = register.value
+            if rs == register.name[1:]:
+                rs = register.value
+
+        if VID != None:
+            if VStall != None:
+                if VStall.cycle > VID.cycle:
+                    newID = ID(cycle=VStall.cycle+1, row=VStall.row,ir=code.opcode,a=rs.zfill(16),b=rt.zfill(16),imm=imm.zfill(16))
+                    newID.save()
+                else:
+                    newID = ID(cycle=VID.cycle+1, row=VID.row+1,ir=code.opcode,a=rs.zfill(16),b=rt.zfill(16),imm=imm.zfill(16))
+                    newID.save()
+            else:
+                newID = ID(cycle=VID.cycle+1, row=VID.row+1,ir=code.opcode,a=rs.zfill(16),b=rt.zfill(16),imm=imm.zfill(16))
+                newID.save()
+        else:        
+            newID = ID(cycle=2, row=1, ir=code.opcode,a=rs.zfill(16),b=rt.zfill(16),imm=imm.zfill(16))
+            newID.save()
+
+    elif "DADDU" or "SLT" in code.value:
+        rd,rs,rt = nonImmediateChecker(code.value)
+        rt,rs,rd = cleaner(rt,rs,rd)
+
+        for register in all_registers:
+            if rt == register.name[1:]:
+                rt = register.value
+            if rs == register.name[1:]:
+                rs = register.value
+
+        if VID != None:
+            if VStall != None:
+                if VStall.cycle > VID.cycle:
+                    newID = ID(cycle=VStall.cycle+1, row=VStall.row,ir=code.opcode,a=rs.zfill(16),b=rt.zfill(16),imm=code.opcode[4:].zfill(16))
+                    newID.save()
+                else:
+                    newID = ID(cycle=VID.cycle+1, row=VID.row+1,ir=code.opcode,a=rs.zfill(16),b=rt.zfill(16),imm=code.opcode[4:].zfill(16))
+                    newID.save()
+            else:
+                newID = ID(cycle=VID.cycle+1, row=VID.row+1,ir=code.opcode,a=rs.zfill(16),b=rt.zfill(16),imm=code.opcode[4:].zfill(16))
+                newID.save()
+        else:        
+            newID = ID(cycle=2, row=1, ir=code.opcode,a=rs.zfill(16),b=rt.zfill(16),imm=code.opcode[4:].zfill(16))
+            newID.save()
+
+    elif "LD" or "SD" in code.value:
+        rt,offset,base = loadstoreCleaner(code.value)
+        rt,offset,base = loadstoreCleaner(rt,offset,base)
+
+        for register in all_registers:
+            if rt == register.name[1:]:
+                rt = register.value
+            if base == register.name[1:]:
+                base = register.value
+
+        if VID != None:
+            if VStall != None:
+                if VStall.cycle > VID.cycle:
+                    newID = ID(cycle=VStall.cycle+1, row=VStall.row,ir=code.opcode,a=base.zfill(16),b=rt.zfill(16),imm=offset.zfill(16))
+                    newID.save()
+                else:
+                    newID = ID(cycle=VID.cycle+1, row=VID.row+1,ir=code.opcode,a=rs.zfill(16),b=rt.zfill(16),imm=offset.zfill(16))
+                    newID.save()
+            else:
+                newID = ID(cycle=VID.cycle+1, row=VID.row+1,ir=code.opcode,a=rs.zfill(16),b=rt.zfill(16),imm=offset.zfill(16))
+                newID.save()
+        else:        
+            newID = ID(cycle=2, row=1, ir=code.opcode,a=rs.zfill(16),b=rt.zfill(16),imm=offset.zfill(16))
+            newID.save()
+       
 
 def EXFunction(code):
+    all_registers = Register.objects.all()
+
     try:
         VEX = EX.objects.latest('id')
     except: 
         VEX = None
     VID = ID.objects.latest('id')
-    if VEX != None:
-        newEX = EX(cycle=VID.cycle+1, row=VID.row)
-        newEX.save()
-    else:
-        newEX = EX(cycle=3, row=1)
-        newEX.save()
+
+    if "DADDIU" in code.value:
+        rt,rs,imm = immediateChecker(code.value)
+        rt,rs,imm = cleaner(rt,rs,imm)
+
+        for register in all_registers:
+            if rt == register.name[1:]:
+                rt = register.value
+            if rs == register.name[1:]:
+                rs = register.value
+        alu = int(rs,16) + int(imm,16)
+        alu = hex(alu)[2:]
+        print("this is alu "+alu) 
+        if VEX != None:
+            newEX = EX(cycle=VID.cycle+1, row=VID.row,cond=0,b=rt.zfill(16),ir=code.opcode,aluoutput=alu.zfill(16))
+            newEX.save()
+        else:
+            newEX = EX(cycle=3, row=1,cond=0,b=rt.zfill(16),ir=code.opcode,aluoutput=alu.zfill(16))
+            newEX.save()
+
+    elif "XORI" in code.value:
+        rt,rs,imm = immediateChecker(code.value)
+        rt,rs,imm = cleaner(rt,rs,imm)
+
+        for register in all_registers:
+            if rt == register.name[1:]:
+                rt = register.value
+            if rs == register.name[1:]:
+                rs = register.value
+
+        imm= bin(int(imm,16)).zfill(16)
+        rs = bin(int(rs,16)).zfill(16)
+        ans = bin(int(imm,2) ^ int(rs,2))
+        ans = ans[2:].zfill(16)
+        ans = hex(int(ans,2))
+        alu = ans[2:]
+
+        if VEX != None:
+            newEX = EX(cycle=VID.cycle+1, row=VID.row,cond=0,b=rt.zfill(16),ir=code.opcode,aluoutput=alu.zfill(16))
+            newEX.save()
+        else:
+            newEX = EX(cycle=3, row=1,cond=0,b=rt.zfill(16),ir=code.opcode,aluoutput=alu.zfill(16))
+            newEX.save()
+
+    elif "DADDU" in code.value:
+        rd,rs,rt = nonImmediateChecker(code.value)
+        rt,rs,rd = cleaner(rt,rs,rd)
+
+        for register in all_registers:
+            if rt == register.name[1:]:
+                rt = register.value
+            if rs == register.name[1:]:
+                rs = register.value
+        alu = int(rs,16) + int(rt,16)
+        alu = hex(alu)[2:]
+        if VEX != None:
+            newEX = EX(cycle=VID.cycle+1, row=VID.row,cond=0,b=rt.zfill(16),ir=code.opcode,aluoutput=alu.zfill(16))
+            newEX.save()
+        else:
+            newEX = EX(cycle=3, row=1,cond=0,b=rt.zfill(16),ir=code.opcode,aluoutput=alu.zfill(16))
+            newEX.save()
+
+    elif "SLT" in code.value:
+        rd,rs,rt = nonImmediateChecker(code.value)
+        rt,rs,rd = cleaner(rt,rs,rd)
+
+        for register in all_registers:
+            if rt == register.name[1:]:
+                rt = register.value
+            if rs == register.name[1:]:
+                rs = register.value
+
+        if rt > rs:
+            alu = 1
+            alu = alu.zfill(16)
+        else:
+            alu = 0
+            alu = alu.zfill(16)
+
+        if VEX != None:
+            newEX = EX(cycle=VID.cycle+1, row=VID.row,cond=0,b=rt.zfill(16),ir=code.opcode,aluoutput=alu.zfill(16))
+            newEX.save()
+        else:
+            newEX = EX(cycle=3, row=1,cond=0,b=rt.zfill(16),ir=code.opcode,aluoutput=alu.zfill(16))
+            newEX.save()
+
+    elif "LD" in code.value:
+        rt,offset,base = loadstoreChecker(code.value)
+        rt,offset,base = loadstoreCleaner(rt,offset,base)
+
+        for register in all_registers:
+            if base == register.name[1:]:
+                base = register.value
+
+        print ("this is base" + base)
+
+        alu = int(base,16) + int(offset,16)
+        alu = hex(alu)[2:]
+        if VEX != None:
+            newEX = EX(cycle=VID.cycle+1, row=VID.row,cond=0,b=rt.zfill(16),ir=code.opcode,aluoutput=alu.zfill(16))   
+            newEX.save()
+        else:
+            newEX = EX(cycle=3, row=1,cond=0,b=rt.zfill(16),ir=code.opcode,aluoutput=alu.zfill(16))
+            newEX.save()
+
+    elif "SD" in code.value:
+        rt,offset,base = loadstoreChecker(code.value)
+        rt,offset,base = loadstoreCleaner(rt,offset,base)
+
+        for register in all_registers:
+            if base == register.name[1:]:
+                base = register.value
+
+        print ("this is base" + base)
+        alu = int(base,16) + int(offset,16)
+        alu = hex(alu)[2:]
+
+        if VEX != None:
+            newEX = EX(cycle=VID.cycle+1, row=VID.row,cond=0,b=rt.zfill(16),ir=code.opcode,aluoutput=alu.zfill(16))   
+            newEX.save()
+        else:
+            newEX = EX(cycle=3, row=1,cond=0,b=rt.zfill(16),ir=code.opcode,aluoutput=alu.zfill(16))
+            newEX.save()
 
 def MEMFunction(code):
+    all_registers = Register.objects.all()
+    all_data = DataSegment.objects.all()
+
     try:
         VMEM = MEM.objects.latest('id')
     except: 
         VMEM = None
-    VEX = EX.objects.latest('id')
-    if VMEM != None:
-        newMEM = MEM(cycle=VEX.cycle+1, row=VEX.row)
-        newMEM.save()
-    else:
-        newMEM = MEM(cycle=4, row=1)
-        newMEM.save()
+    try:
+        VEX = EX.objects.latest('id')
+    except:
+        VEX = None
+    if "DADDIU" in code.value:
+        rt,rs,imm = immediateChecker(code.value)
+        rt,rs,imm = cleaner(rt,rs,imm)
+
+        for register in all_registers:
+            if rt == register.name[1:]:
+                rt = register.value
+            if rs == register.name[1:]:
+                rs = register.value
+        alu = int(rs,16) + int(imm,16)
+        alu = hex(alu)[2:]
+
+        if VMEM != None:
+            newMEM = MEM(cycle=VEX.cycle+1, row=VEX.row,ir=code.opcode,aluoutput=alu.zfill(16),lmd="N/A",memoryrange="N/A")
+            newMEM.save()
+        else:
+            newMEM = MEM(cycle=4, row=1,ir=code.opcode,aluoutput=alu.zfill(16),lmd="N/A",memoryrange="N/A")
+            newMEM.save()
+
+    if "XORI" in code.value:
+        rt,rs,imm = immediateChecker(code.value)
+        rt,rs,imm = cleaner(rt,rs,imm)
+
+        for register in all_registers:
+            if rt == register.name[1:]:
+                rt = register.value
+            if rs == register.name[1:]:
+                rs = register.value
+
+        imm= bin(int(imm,16)).zfill(16)
+        rs = bin(int(rs,16)).zfill(16)
+        ans = bin(int(imm,2) ^ int(rs,2))
+        ans = ans[2:].zfill(16)
+        ans = hex(int(ans,2))
+        alu = ans[2:]
+
+        if VMEM != None:
+            newMEM = MEM(cycle=VEX.cycle+1, row=VEX.row,ir=code.opcode,aluoutput=alu.zfill(16),lmd="N/A",memoryrange="N/A")
+            newMEM.save()
+        else:
+            newMEM = MEM(cycle=4, row=1,ir=code.opcode,aluoutput=alu.zfill(16),lmd="N/A",memoryrange="N/A")
+            newMEM.save()
+
+    elif "DADDU" in code.value:
+        rd,rs,rt = nonImmediateChecker(code.value)
+        rt,rs,rd = cleaner(rt,rs,rd)
+
+        for register in all_registers:
+            if rt == register.name[1:]:
+                rt = register.value
+            if rs == register.name[1:]:
+                rs = register.value
+        alu = int(rs,16) + int(rt,16)
+        alu = hex(alu)[2:]
+
+        if VMEM != None:
+            newMEM = MEM(cycle=VEX.cycle+1, row=VEX.row,ir=code.opcode,aluoutput=alu.zfill(16),lmd="N/A",memoryrange="N/A")
+            newMEM.save()
+        else:
+            newMEM = MEM(cycle=4, row=1,ir=code.opcode,aluoutput=alu.zfill(16),lmd="N/A",memoryrange="N/A")
+            newMEM.save()
+
+    elif "SLT" in code.value:
+        rd,rs,rt = nonImmediateChecker(code.value)
+        rt,rs,rd = cleaner(rt,rs,rd)
+
+        for register in all_registers:
+            if rt == register.name[1:]:
+                rt = register.value
+            if rs == register.name[1:]:
+                rs = register.value
+
+        if rt > rs:
+            alu = 1
+            alu = alu.zfill(16)
+        else:
+            alu = 0
+            alu = alu.zfill(16)
+        
+        if VMEM != None:
+            newMEM = MEM(cycle=VEX.cycle+1, row=VEX.row,ir=code.opcode,aluoutput=alu.zfill(16),lmd="N/A",memoryrange="N/A")
+            newMEM.save()
+        else:
+            newMEM = MEM(cycle=4, row=1,ir=code.opcode,aluoutput=alu.zfill(16),lmd="N/A",memoryrange="N/A")
+            newMEM.save()
+
+    elif "LD" in code.value:
+        rt,offset,base = loadstoreCleaner(code.value)
+        rt,offset,base = loadstoreCleaner(rt,offset,base)
+
+        for register in all_registers:
+            if base == register.name[1:]:
+                base = register.value
+        alu = int(base,16) + int(offset,16)
+        alu = hex(alu)[2:]
+
+        for i in all_data:
+            if i.name == alu:
+                lmd = i.value
+        if VMEM != None:
+            newMEM = MEM(cycle=VEX.cycle+1, row=VEX.row,ir=code.opcode,aluoutput=alu.zfill(16),lmd=lmd,memoryrange="N/A")
+            newMEM.save()
+        else:
+            newMEM = MEM(cycle=4, row=1,ir=code.opcode,aluoutput=alu.zfill(16),lmd=lmd,memoryrange="N/A")
+            newMEM.save()
+
+    elif "SD" in code.value:
+        rt,offset,base = loadstoreCleaner(code.value)
+        rt,offset,base = loadstoreCleaner(rt,offset,base)
+
+        for register in all_registers:
+            if base == register.name[1:]:
+                base = register.value
+        alu = int(base,16) + int(offset,16)
+        alu = hex(alu)[2:]
+        answer = int(alu,16) + int("7",16)
+        answer = hex(answer)
+        mrange = alu + " - " + answer[2:] 
+
+        if VMEM != None:
+            newMEM = MEM(cycle=VEX.cycle+1, row=VEX.row,ir=code.opcode,aluoutput=alu,lmd="N/A",memoryrange=mrange)
+            newMEM.save()
+        else:
+            newMEM = MEM(cycle=4, row=1,ir=code.opcode,aluoutput=alu,lmd="N/A",memoryrange=mrange)
+            newMEM.save()
 
 def WBFunction(code):
+    all_registers = Register.objects.all()
+    all_data = DataSegment.objects.all()
+
     try:
         VWB = WB.objects.latest('id')
     except: 
         VWB = None
-    VMEM = MEM.objects.latest('id')
-    if VWB != None:
-        newWB = WB(cycle=VMEM.cycle+1, row=VMEM.row)
-        newWB.save()
-    else:
-        newWB = WB(cycle=5, row=1)
-        newWB.save()
+    try:
+        VMEM = MEM.objects.latest('id')
+    except:
+        VMEM = None
+    if "DADDIU" in code.value:
+        rt,rs,imm = immediateChecker(code.value)
+        rt,rs,imm = cleaner(rt,rs,imm)
+
+        for register in all_registers:
+            if rs == register.name[1:]:
+                rs = register.value
+        alu = int(rs,16) + int(imm,16)
+        alu = hex(alu)[2:]
+
+        for register in all_registers:
+            if register.name[1:] == rt:
+                register.value = alu.zfill(16)
+                register.save()
+
+        if VWB != None:
+            newWB = WB(cycle=VMEM.cycle+1, row=VMEM.row,result=alu.zfill(16))
+            newWB.save()
+        else:
+            newWB = WB(cycle=5, row=1,result=alu.zfill(16))
+            newWB.save()
+
+    if "XORI" in code.value:
+        rt,rs,imm = immediateChecker(code.value)
+        rt,rs,imm = cleaner(rt,rs,imm)
+
+        for register in all_registers:
+            if rs == register.name[1:]:
+                rs = register.value
+        imm= bin(int(imm,16)).zfill(16)
+        rs = bin(int(rs,16)).zfill(16)
+        ans = bin(int(imm,2) ^ int(rs,2))
+        ans = ans[2:].zfill(16)
+        ans = hex(int(ans,2))
+        alu = ans[2:]
+
+        for register in all_registers:
+            if register.name[1:] == rt:
+                register.value = alu.zfill(16)
+                register.save()
+
+        if VWB != None:
+            newWB = WB(cycle=VMEM.cycle+1, row=VMEM.row,result=alu.zfill(16))
+            newWB.save()
+        else:
+            newWB = WB(cycle=5, row=1,result=alu.zfill(16))
+            newWB.save()
+
+    elif "DADDU" in code.value:
+        rd,rs,rt = nonImmediateChecker(code.value)
+        rt,rs,rd = cleaner(rt,rs,rd)
+
+        for register in all_registers:
+            if rt == register.name[1:]:
+                rt = register.value
+            if rs == register.name[1:]:
+                rs = register.value
+        alu = int(rs,16) + int(rt,16)
+        alu = hex(alu)[2:]
+
+        for register in all_registers:
+            if register.name[1:] == rd:
+                register.value = alu.zfill(16)
+                register.save()
+
+        if VWB != None:
+            newWB = WB(cycle=VMEM.cycle+1, row=VMEM.row,result=alu.zfill(16))
+            newWB.save()
+        else:
+            newWB = WB(cycle=5, row=1,result=alu.zfill(16))
+            newWB.save()
+
+    elif "SLT" in code.value:
+        rd,rs,rt = nonImmediateChecker(code.value)
+        rt,rs,rd = cleaner(rt,rs,rd)
+
+        for register in all_registers:
+            if rt == register.name[1:]:
+                rt = register.value
+            if rs == register.name[1:]:
+                rs = register.value
+
+        if rt > rs:
+            alu = 1
+            alu = alu.zfill(16)
+        else:
+            alu = 0
+            alu = alu.zfill(16)
         
+        for register in all_registers:
+            if register.name[1:] == rd:
+                register.value = alu
+                register.save()
+
+        if VWB != None:
+            newWB = WB(cycle=VMEM.cycle+1, row=VMEM.row,result=alu.zfill(16))
+            newWB.save()
+        else:
+            newWB = WB(cycle=5, row=1,result=alu.zfill(16))
+            newWB.save()
+
+
+    elif "LD" in code.value:
+        rt,offset,base = loadstoreChecker(code.value)
+        rt,offset,base = loadstoreCleaner(rt,offset,base)
+
+        for register in all_registers:
+            if base == register.name[1:]:
+                base = register.value
+        alu = int(base,16) + int(offset,16)
+        alu = hex(alu)[2:]
+
+        for i in all_data:
+            if i.name == alu:
+                lmd = i.value
+
+        for register in all_registers:
+            if register.name[1:] == rt:
+                register.value = lmd.zfill(16)
+                register.save()
+
+        if VWB != None:
+            newWB = WB(cycle=VMEM.cycle+1, row=VMEM.row,result=lmd.zfill(16))
+            newWB.save()
+        else:
+            newWB = WB(cycle=5, row=1,result=lmd.zfill(16))
+            newWB.save()
+
+    elif "SD" in code.value:
+        rt,offset,base = loadstoreChecker(code.value)
+        rt,offset,base = loadstoreCleaner(rt,offset,base)
+
+        for register in all_registers:
+            if base == register.name[1:]:
+                base = register.value
+            if rt == register.name[1:]:
+                rt = register.value
+        alu = int(base,16) + int(offset,16)
+        alu = hex(alu)[2:]
+        answer = int(alu,16) + int("7",16)
+        answer = hex(answer)
+        mrange = alu + " - " + answer[2:] 
+
+        for data in all_data:
+            if data.name == alu:
+                data.value = rt.zfill(16)
+        if VWB != None:
+            newWB = WB(cycle=VMEM.cycle+1, row=VMEM.row,result="N/A")
+            newWB.save()
+        else:
+            newWB = WB(cycle=5, row=1,result="N/A")
+            newWB.save()
 def reset(request):
     registers = Register.objects.all()
     clear = MemoryClearer.objects.all()
@@ -592,10 +1080,52 @@ def programRegistered(request):
         newClearer = MemoryClearer(name=y.name, memoryType=1)
         newClearer.save()
         x = x + 1
+
+    programMips = MipsProgram.objects.all().order_by('id')[:request.session['programCount']]
+
+    for i in programMips:
+        if "BC" in i.value:
+            opcod = 'C8'
+            temp = i.value[2:]
+            temp = temp.strip()
+            temp = temp + ":"
+            num1 = i.name
+            for x in programMips:
+                if temp in x.value:
+                    num2 = x.name
+            half = num2 - num1
+            half = half/4 - 1
+            half = int(half)
+            half = str(half).zfill(7)
+            final = opcod + half
+            i.opcode = final
+            i.save()
+        elif "BGTZ" in i.value:
+            opcod = '1C2'
+            temp = i.value[4:]
+            temp = temp.strip()
+            temp = temp + ":"
+            num1 = i.name
+            print(num1)
+            print(temp)
+            num2 = 0
+            for x in programMips:
+                if temp in x.value:
+                    num2 = x.name
+            print
+            half = num2 - num1
+            half = half/4 - 1
+            half = int(half)
+            half = str(half).zfill(5)
+            final = opcod + half
+            print(final)
+            i.opcode = final
+            i.save()            
     return render(request, 'simulator/home.html')
 
 def pipeline(request):
     programMips = MipsProgram.objects.all().order_by('id')[:request.session['programCount']]
+
     for x in programMips:
         IFFunction(x)
         IDFunction(x)
