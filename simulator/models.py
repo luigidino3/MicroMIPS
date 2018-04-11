@@ -41,46 +41,47 @@ class IF(models.Model):
 		return self.name
 	
 class ID(models.Model):
-	name = models.IntegerField(default=0)
-	opcode = models.CharField(blank=True, null=True, max_length=8)
-	a = models.IntegerField(default=0)
-	b = models.IntegerField(default=0)
-	imm = models.IntegerField(default=0)
-	npc = models.IntegerField(default=0)
+	cycle = models.IntegerField(default=0)
+    row = models.IntegerField(default=0)
+	a = models.CharField(default=0)
+	b = models.CharField(default=0)
+	imm = models.CharField(default=0)
+	npc = models.CharField(default=0)
 	
 	def __int__(self):
 		return self.name
 	
 class EX(models.Model):
-	name = models.IntegerField(default=0)
-	opcode = models.CharField(blank=True, null=True, max_length=8)
-	aluoutput = models.IntegerField(default=0)
-	cond = models.IntegerField(default=0)
-	b = models.IntegerField(default=0)
+	cycle = models.IntegerField(default=0)
+    row = models.IntegerField(default=0)
+	aluoutput = models.CharField(default=0)
+	cond = models.CharField(default=0)
+	b = models.CharField(default=0)
 	
 	def __int__(self):
 		return self.name
 	
 class MEM(models.Model):
-	name = models.IntegerField(default=0)
-	opcode = models.CharField(blank=True, null=True, max_length=8)
-	lmd = models.IntegerField(default=0)
-	aluoutput = models.IntegerField(default=0)
+	cycle = models.IntegerField(default=0)
+    row = models.IntegerField(default=0)
+	lmd = models.CharField(default=0)
+	aluoutput = models.CharField(default=0)
 	memoryrange = models.CharField(blank=True, null=True, max_length=8)
 	
 	def __int__(self):
 		return self.name
 	
 class WB(models.Model):
-	name = models.IntegerField(default=0)
-	opcode = models.CharField(blank=True, null=True, max_length=8)
-	result = models.IntegerField(default=0)
+	cycle = models.IntegerField(default=0)
+    row = models.IntegerField(default=0)
+	result = models.CharField(default=0)
 	
 	def __int__(self):
 		return self.name
 	
 class Stall(models.Model):
-	name = models.IntegerField(default=0)
+	cycle = models.IntegerField(default=0)
+    row = models.IntegerField(default=0)
 	
 	def __int__(self):
 		return self.name
