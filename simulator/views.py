@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
-from .models import Register, DataSegment, MipsProgram, MemoryClearer, IF, ID, EX, MEM, WB
+from .models import Register, DataSegment, MipsProgram, MemoryClearer, IF, ID, EX, MEM, WB, Stall
 import re
 
 def immediateChecker(code):
@@ -300,11 +300,38 @@ def opcode(code):
             final2 = '0'
             print("OPCODE in Binary: " + opcode + "26-bit offset")
     else:
-       print ("Syntax error!")
+       print("Syntax error!")
        final2 = "Error"
 
     return final2
 
+
+def IFFunction(code):
+    try:
+        VIF = IF.objects.latest('id')
+    except: 
+        VIF = None
+    try:
+        VStall = Stall.objects.latest('id')
+    except: 
+        VStall = None
+    if VIF != None:
+        IFcycle = 0
+        IFrow = 0
+        if VStall != None:
+            if VStall.cycle < VIF.cycle:
+                IFcycle = VIF.cycle + 1
+            else:
+                IFcycle = VStall.cycle + 1
+        else:
+            IFcycle = VIF.cycle + 1
+        IFrow = VIF.row + 1     
+        newIF = IF(cycle = IFcycle, row = IFrow, ir = code.opcode, pc = hex(code.name + 4)[2:].zfill(4).upper())
+        newIF.save()
+    else:
+        newIF = IF(cycle = 1, row = 1, ir = code.opcode, pc =  hex(code.name + 4)[2:].zfill(4).upper())
+        newIF.save()
+    
 def reset(request):
     registers = Register.objects.all()
     clear = MemoryClearer.objects.all()
@@ -332,16 +359,16 @@ def reset(request):
                 reset = None
     while MemoryClearer.objects.count():
         MemoryClearer.objects.all()[0].delete()
-    while IF.objects.count():
-        IF.objects.all()[0].delete()
-    while ID.objects.count():
-        ID.objects.all()[0].delete()
-    while EX.objects.count():
-        EX.objects.all()[0].delete()
-    while MEM.objects.count():
-        MEM.objects.all()[0].delete()
-    while WB.objects.count():
-        WB.objects.all()[0].delete()
+#    while IF.objects.count():
+#        IF.objects.all()[0].delete()
+#    while ID.objects.count():
+#        ID.objects.all()[0].delete()
+#    while EX.objects.count():
+#        EX.objects.all()[0].delete()
+#    while MEM.objects.count():
+#        MEM.objects.all()[0].delete()
+#    while WB.objects.count():
+#        WB.objects.all()[0].delete()
     return render(request, 'simulator/home.html')
 #    for x in data:
 #        x.value = "0000000000000000"
@@ -497,4 +524,6 @@ def programRegistered(request):
 
 def pipeline(request):
     programMips = MipsProgram.objects.all().order_by('id')[:request.session['programCount']]
-    return render(request, 'simulator/pipeline.html', context)
+    for x in programMips:
+        IFFunction(x)
+    return render(request, 'simulator/pipeline.html')
