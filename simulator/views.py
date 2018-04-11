@@ -398,7 +398,31 @@ def IDFunction(code):
             newID = ID(cycle=2, row=1, ir=code.opcode,a=rs.zfill(16),b=rt.zfill(16),imm=imm.zfill(16))
             newID.save()
 
-    elif "DADDU" or "SLT" in code.value:
+    elif "DADDU" in code.value:
+        rd,rs,rt = nonImmediateChecker(code.value)
+        rt,rs,rd = cleaner(rt,rs,rd)
+
+        for register in all_registers:
+            if rt == register.name[1:]:
+                rt = register.value
+            if rs == register.name[1:]:
+                rs = register.value
+
+        if VID != None:
+            if VStall != None:
+                if VStall.cycle > VID.cycle:
+                    newID = ID(cycle=VStall.cycle+1, row=VStall.row,ir=code.opcode,a=rs.zfill(16),b=rt.zfill(16),imm=code.opcode[4:].zfill(16))
+                    newID.save()
+                else:
+                    newID = ID(cycle=VID.cycle+1, row=VID.row+1,ir=code.opcode,a=rs.zfill(16),b=rt.zfill(16),imm=code.opcode[4:].zfill(16))
+                    newID.save()
+            else:
+                newID = ID(cycle=VID.cycle+1, row=VID.row+1,ir=code.opcode,a=rs.zfill(16),b=rt.zfill(16),imm=code.opcode[4:].zfill(16))
+                newID.save()
+        else:        
+            newID = ID(cycle=2, row=1, ir=code.opcode,a=rs.zfill(16),b=rt.zfill(16),imm=code.opcode[4:].zfill(16))
+            newID.save()
+    elif "SLT" in code.value:
         rd,rs,rt = nonImmediateChecker(code.value)
         rt,rs,rd = cleaner(rt,rs,rd)
 
@@ -424,7 +448,7 @@ def IDFunction(code):
             newID.save()
 
     elif "LD" or "SD" in code.value:
-        rt,offset,base = loadstoreCleaner(code.value)
+        rt,offset,base = loadstoreChecker(code.value)
         rt,offset,base = loadstoreCleaner(rt,offset,base)
 
         for register in all_registers:
@@ -439,13 +463,13 @@ def IDFunction(code):
                     newID = ID(cycle=VStall.cycle+1, row=VStall.row,ir=code.opcode,a=base.zfill(16),b=rt.zfill(16),imm=offset.zfill(16))
                     newID.save()
                 else:
-                    newID = ID(cycle=VID.cycle+1, row=VID.row+1,ir=code.opcode,a=rs.zfill(16),b=rt.zfill(16),imm=offset.zfill(16))
+                    newID = ID(cycle=VID.cycle+1, row=VID.row+1,ir=code.opcode,a=base.zfill(16),b=rt.zfill(16),imm=offset.zfill(16))
                     newID.save()
             else:
-                newID = ID(cycle=VID.cycle+1, row=VID.row+1,ir=code.opcode,a=rs.zfill(16),b=rt.zfill(16),imm=offset.zfill(16))
+                newID = ID(cycle=VID.cycle+1, row=VID.row+1,ir=code.opcode,a=base.zfill(16),b=rt.zfill(16),imm=offset.zfill(16))
                 newID.save()
         else:        
-            newID = ID(cycle=2, row=1, ir=code.opcode,a=rs.zfill(16),b=rt.zfill(16),imm=offset.zfill(16))
+            newID = ID(cycle=2, row=1, ir=code.opcode,a=base.zfill(16),b=rt.zfill(16),imm=offset.zfill(16))
             newID.save()
        
 
@@ -487,8 +511,8 @@ def EXFunction(code):
             if rs == register.name[1:]:
                 rs = register.value
 
-        imm= bin(int(imm,16)).zfill(16)
-        rs = bin(int(rs,16)).zfill(16)
+        imm= bin(int(imm,16))
+        rs = bin(int(rs,16))
         ans = bin(int(imm,2) ^ int(rs,2))
         ans = ans[2:].zfill(16)
         ans = hex(int(ans,2))
@@ -530,10 +554,10 @@ def EXFunction(code):
                 rs = register.value
 
         if rt > rs:
-            alu = 1
+            alu = '1'
             alu = alu.zfill(16)
         else:
-            alu = 0
+            alu = '0'
             alu = alu.zfill(16)
 
         if VEX != None:
@@ -622,8 +646,8 @@ def MEMFunction(code):
             if rs == register.name[1:]:
                 rs = register.value
 
-        imm= bin(int(imm,16)).zfill(16)
-        rs = bin(int(rs,16)).zfill(16)
+        imm= bin(int(imm,16))
+        rs = bin(int(rs,16))
         ans = bin(int(imm,2) ^ int(rs,2))
         ans = ans[2:].zfill(16)
         ans = hex(int(ans,2))
@@ -666,10 +690,10 @@ def MEMFunction(code):
                 rs = register.value
 
         if rt > rs:
-            alu = 1
+            alu = '1'
             alu = alu.zfill(16)
         else:
-            alu = 0
+            alu = '0'
             alu = alu.zfill(16)
         
         if VMEM != None:
@@ -680,7 +704,7 @@ def MEMFunction(code):
             newMEM.save()
 
     elif "LD" in code.value:
-        rt,offset,base = loadstoreCleaner(code.value)
+        rt,offset,base = loadstoreChecker(code.value)
         rt,offset,base = loadstoreCleaner(rt,offset,base)
 
         for register in all_registers:
@@ -688,7 +712,7 @@ def MEMFunction(code):
                 base = register.value
         alu = int(base,16) + int(offset,16)
         alu = hex(alu)[2:]
-
+        lmd = None
         for i in all_data:
             if i.name == alu:
                 lmd = i.value
@@ -700,7 +724,7 @@ def MEMFunction(code):
             newMEM.save()
 
     elif "SD" in code.value:
-        rt,offset,base = loadstoreCleaner(code.value)
+        rt,offset,base = loadstoreChecker(code.value)
         rt,offset,base = loadstoreCleaner(rt,offset,base)
 
         for register in all_registers:
@@ -760,8 +784,8 @@ def WBFunction(code):
         for register in all_registers:
             if rs == register.name[1:]:
                 rs = register.value
-        imm= bin(int(imm,16)).zfill(16)
-        rs = bin(int(rs,16)).zfill(16)
+        imm= bin(int(imm,16))
+        rs = bin(int(rs,16))
         ans = bin(int(imm,2) ^ int(rs,2))
         ans = ans[2:].zfill(16)
         ans = hex(int(ans,2))
@@ -814,10 +838,10 @@ def WBFunction(code):
                 rs = register.value
 
         if rt > rs:
-            alu = 1
+            alu = '1'
             alu = alu.zfill(16)
         else:
-            alu = 0
+            alu = '0'
             alu = alu.zfill(16)
         
         for register in all_registers:
@@ -842,7 +866,7 @@ def WBFunction(code):
                 base = register.value
         alu = int(base,16) + int(offset,16)
         alu = hex(alu)[2:]
-
+        lmd = ""
         for i in all_data:
             if i.name == alu:
                 lmd = i.value
@@ -1189,8 +1213,10 @@ def pipeline(request):
     mipsList = [["",""]]
     first = 0
     second = first + 1
+    '''
     for x in programMips: 
         mipsList[[first]].append(hex(x.name)[2:].zfill(4).upper())
+    '''
     context ={
         'table': all_table,
         'lastCycle': listCycle,
