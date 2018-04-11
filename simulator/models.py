@@ -20,7 +20,7 @@ class DataSegment(models.Model): #512
 class MipsProgram(models.Model): #1024
     name = models.IntegerField(default=0)
     value = models.CharField(blank=True, null=True, max_length=500)
-    
+    opcode = models.CharField(blank=True, null=True, max_length=10)
     def __int__(self):
         return self.name
     
