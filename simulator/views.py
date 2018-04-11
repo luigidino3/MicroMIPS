@@ -201,10 +201,3 @@ def pipeline(request):
 		'datasegment' : DataSegment.objects.all(),
 	}
 	return render(request, 'simulator/pipeline.html', context)
-
-
-
-    #HELLO WORLD
-    #HELLO
-    #HELLO
-    
