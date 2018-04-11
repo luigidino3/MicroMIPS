@@ -331,7 +331,70 @@ def IFFunction(code):
     else:
         newIF = IF(cycle = 1, row = 1, ir = code.opcode, pc =  hex(code.name + 4)[2:].zfill(4).upper())
         newIF.save()
-    
+
+def IDFunction(code):
+    try:
+        VStall = Stall.objects.latest('id')
+    except: 
+        VStall = None
+    try:
+        VID = ID.objects.latest('id')
+    except: 
+        VID = None
+    if VID != None:
+        if VStall != None:
+            if VStall.cycle > VID.cycle:
+                newID = ID(cycle=VStall.cycle+1, row=VStall.row)
+                newID.save()
+            else:
+                newID = ID(cycle=VID.cycle+1, row=VID.row+1)
+                newID.save()
+        else:
+            newID = ID(cycle=VID.cycle+1, row=VID.row+1)
+            newID.save()
+    else:        
+        newID = ID(cycle=2, row=1)
+        newID.save()
+
+def EXFunction(code):
+    try:
+        VEX = EX.objects.latest('id')
+    except: 
+        VEX = None
+    VID = ID.objects.latest('id')
+    if VEX != None:
+        newEX = EX(cycle=VID.cycle+1, row=VID.row)
+        newEX.save()
+    else:
+        newEX = EX(cycle=3, row=1)
+        newEX.save()
+
+def MEMFunction(code):
+    try:
+        VMEM = MEM.objects.latest('id')
+    except: 
+        VMEM = None
+    VEX = EX.objects.latest('id')
+    if VMEM != None:
+        newMEM = MEM(cycle=VEX.cycle+1, row=VEX.row)
+        newMEM.save()
+    else:
+        newMEM = MEM(cycle=4, row=1)
+        newMEM.save()
+
+def WBFunction(code):
+    try:
+        VWB = WB.objects.latest('id')
+    except: 
+        VWB = None
+    VMEM = MEM.objects.latest('id')
+    if VWB != None:
+        newWB = WB(cycle=VMEM.cycle+1, row=VMEM.row)
+        newWB.save()
+    else:
+        newWB = WB(cycle=5, row=1)
+        newWB.save()
+        
 def reset(request):
     registers = Register.objects.all()
     clear = MemoryClearer.objects.all()
@@ -526,4 +589,29 @@ def pipeline(request):
     programMips = MipsProgram.objects.all().order_by('id')[:request.session['programCount']]
     for x in programMips:
         IFFunction(x)
+        IDFunction(x)
+        EXFunction(x)
+        MEMFunction(x)
+        WBFunction(x)
     return render(request, 'simulator/pipeline.html')
+
+def purge(request):
+    VIF = IF.objects.all()
+    VID = ID.objects.all()
+    VEX = EX.objects.all()
+    VMEM = MEM.objects.all()
+    VWB = WB.objects.all()
+    VStall = Stall.objects.all()
+    for x in VIF:
+        x.delete()
+    for x in VID:
+        x.delete()
+    for x in VEX:
+        x.delete()
+    for x in VMEM:
+        x.delete()
+    for x in VWB:
+        x.delete()
+    for x in VStall:
+        x.delete()
+    return render(request, 'simulator/home.html')

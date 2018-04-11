@@ -10,4 +10,5 @@ urlpatterns = [
     url(r'^gotoMemory/', views.gotoMemory, name = 'gotoMemory'),
     url(r'^programRegistered/', views.programRegistered, name='programRegistered'),
 	url(r'^pipeline/', views.pipeline, name = 'pipeline'),
+    url(r'^clearedPipeline/', views.purge, name = 'purge'),
 ]
