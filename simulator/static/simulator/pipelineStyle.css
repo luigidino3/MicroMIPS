@@ -1,0 +1,81 @@
+body {
+	background-color: lightgray;
+	text-align: center;
+	font-family: Century Gothic;
+}
+
+h1 {
+	font-family: Century Gothic;
+	font-size: 45px;
+	text-align: center;
+	margin-top: 60px;
+	margin-bottom: 0px;
+}
+
+p{
+	margin-bottom: 30px;
+}
+
+button {
+	background-color: black;
+	color: azure;
+	font-family:Century Gothic;
+	font-size: 18px;
+	border-radius: 10px;
+	height: 60px;
+	width: 130px;
+}
+
+table {
+	font-family:Century Gothic;
+	font-size: 20px;
+	table-layout: fixed;
+}
+
+th, td {
+	width: auto;
+	text-align: center;
+	vertical-align: middle;
+}
+
+#mainTable {
+	display: flex;
+	flex: auto;
+	justify-content: center;
+	width: 100%;
+	height: auto;
+}
+
+#programTable {
+	background-color: rgba(0, 0, 0, 0.15);
+	border-right: solid;
+	border-right-color: black;
+	width: auto;
+	padding: 10px;
+}
+
+#clockCycleTable {
+	background-color: rgba(0, 0, 0, 0.15);
+	overflow-x: auto;
+	width: auto;
+	padding: 10px;
+}
+
+#clockCycles {
+	overflow-x: auto;
+	width: auto;
+/*	padding: 10px;*/
+}
+
+#endbuttons {
+	display: flex;
+	flex: auto;
+	justify-content: space-between;
+	width: 600px;
+	margin: auto;
+	margin-top: 30px;
+}
+
+#nextbtn, #fullbtn {
+	width: 200px;
+}

@@ -1,0 +1,51 @@
+{% load staticfiles %}
+<link rel = "stylesheet" type = "text/css" href = "{% static 'simulator/inputRegStyle.css'%}"/>
+
+<h1>INPUT VALUES FOR REGISTERS</h1>
+<p>Default value for all registers is 0.</p>
+
+<div id = "inputs">
+    <form action="{% url 'registeredReg' %}" method="post">
+		{% csrf_token %}
+		<table>
+			<tr class = "tablehead">
+				<th> Register </th>
+				<th> Value </th>
+			</tr>
+			{% for register in first_registers %}
+			<tr>
+				<td class = "regs"> {{ register.name }} </td>
+				<td class = "textField"><input type = "text" value="{{ register.value }}" name="{{ register.name }}" maxlength="16" minlength="16"></td>
+			</tr>
+			{% endfor %}    
+		</table>
+
+		<table>
+			<tr class = "tablehead">
+				<th> Register </th>
+				<th> Value </th>
+			</tr>
+			{% for register in second_registers %}
+			<tr>
+				<td class = "regs"> {{ register.name }} </td>
+				<td class = "textField"><input type = "text" value="{{ register.value }}" name="{{ register.name }}"></td>
+			</tr>
+			{% endfor %}    
+		</table>
+
+		<table>
+			<tr class = "tablehead">
+				<th> Register </th>
+				<th> Value </th>
+			</tr>
+			{% for register in third_registers %}
+			<tr>
+				<td class = "regs"> {{ register.name }} </td>
+				<td class = "textField"><input type = "text" value="{{ register.value }}" name="{{ register.name }}"></td>
+			</tr>
+			{% endfor %}
+		</table>
+		<button id="submitbutton">SUBMIT</button> <!--prompt to confirm saved changes-->
+	</form>
+	<button id = "cancelbutton" onclick = "location.href = '{% url 'home' %}'">CANCEL</button>
+</div>

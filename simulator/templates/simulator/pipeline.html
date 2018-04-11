@@ -1,0 +1,67 @@
+{% load staticfiles %}
+<html>
+<link rel = "stylesheet" type = "text/css" href = "{% static 'simulator/pipelineStyle.css'%}"/>
+
+<h1>Pipeline Map</h1>
+<p>S12-6: BGTZ/BC (Pipeline Freeze)</p>
+
+<div id = "datatable">
+	{% csrf_token %}
+	<table id = "datasegmenttable">
+		<tr class = "tablehead">
+			<th> Address </th>
+			<th> Value </th>
+		</tr>
+		
+		{% for datasegment in datasegment %}
+			<tr>
+				<td> {{ datasegment.name }} </td>
+				<td> {{ datasegment.value }} </td>
+			</tr>
+		{% endfor %}
+	</table>
+</div>
+
+<div id = "mainTable">
+	<div id = "programTable">
+		<table>
+			<tr><th>Program</th></tr>
+			{% for mipsprogram in program %}
+				<tr> <td> {{ mipsprogram.value }} </td> </tr>
+			{% endfor %}
+		</table>
+	</div>
+
+	<div id = "clockCycleTable">
+		<table id = "clockCycles">
+			<!--temporary, clock cycles should be dynamic-->
+			<tr>
+				<th>Cycle 1</th>
+				<th>Cycle 2</th>
+				<th>Cycle 3</th>
+				<th>Cycle 4</th>
+				<th>Cycle 5</th>
+
+
+				<!--add <th> in the next clock cycle-->
+			</tr>
+
+			<tr>
+				<td>IF</td>
+				<td>ID</td>
+				<td>EX</td>
+				<td>MEM</td>
+				<td>WB</td>
+				<!--add <td> in the next clock cycle-->
+			</tr>
+
+		</table>
+	</div>
+</div>
+
+<div id = "endbuttons">
+	<button  onclick = "location.href = '{% url 'home' %}'">BACK</button>	
+	<button id = "nextbtn">NEXT CLOCK CYCLE</button>
+	<button id = "fullbtn">FINISH EXECUTION</button>
+</div>
+</html>

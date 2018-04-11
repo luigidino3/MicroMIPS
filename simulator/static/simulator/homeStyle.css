@@ -1,0 +1,173 @@
+body {
+	background-color: lightgray;
+}
+
+h1 {
+	font-family: Century Gothic;
+	font-size: 45px;
+	text-align: center;
+	margin-top: 60px;
+	margin-bottom: 0px;
+}
+
+h2 {
+	font-family: Century Gothic;
+	font-size: 18px;
+	text-align: center;
+	margin-bottom: 60px;
+}
+
+h3 {
+	font-family: Century Gothic;
+	font-size: 20px;
+	text-align: center;
+}
+
+button {
+	background-color: black;
+	color: azure;
+	font-family:Century Gothic;
+	font-size: 18px;
+	display: block;
+	margin: auto;
+	margin-bottom: 15px;
+	height: 50px;
+	width: 100%;
+	border-radius: 10px;
+}
+
+textarea {
+	height: 300px;
+	width: 1000px;
+	margin-top: 20px;
+	font-size: 18px;
+	border-radius: 8px;
+}
+
+form {
+	font-family: Century Gothic;
+	font-size: 18px;
+	text-align: right;
+	height:  50px;
+}
+
+input[type="text"] {
+	border-radius: 8px;
+	height: 35px;
+	width: 300px;
+	margin-left: 10px;
+}
+
+p {
+	font-size: 14px;
+	margin-right: 70px;
+}
+
+input[type="text"], #gotoprompt{
+	position: relative;
+	bottom: 55px;
+	left: 310px;
+}
+
+#menu {
+	margin: auto;
+	height: 270px;
+	width: 380px;
+}
+
+#inputProgPopup_wrapper, #gotoMemPopup_wrapper, #inputValPopup_wrapper {	
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	background-color: rgba(0,0,0,0.7);
+	width: 100%;
+	height: 100%;
+}
+
+#inputProgPopup_container, #gotoMemPopup_container, #inputValPopup_container {
+	width:1000px;
+	margin: 70px auto;
+	background-color: whitesmoke;
+	padding: 20px;
+	border-radius: 8px;	
+}
+
+#inputProgPopup_container {
+	height: 450px;
+}
+
+#memoryAddressField {
+	width: 500px;
+	margin: auto;
+	padding-top: 20px;
+	padding-bottom: 20px;
+	text-align: center;
+}
+
+
+#inputValForm {
+	position: relative;
+	left: 250px;
+	text-align: left;
+	height: 200px;
+	width: 600px;
+	padding-top: 20px;
+}
+
+#memoryaddressform, #valueform {
+	position: relative;
+	top: 0px;
+	left: 0px;
+}
+
+#inputvalprompt {
+	position: relative;
+	left: 170px;
+}
+
+#gotoInput {
+	display: flex;
+	flex-flow: column;
+}
+
+
+#submitvalbutton {
+	position: relative;
+	top: 80px;
+	right: 150px;
+	
+}
+
+#cancelvalbutton {
+	position: relative;
+	left: 150px;
+}
+
+#returnbutton {
+	position: relative;
+	left: 200px;
+	padding-top: 20px;
+	padding-bottom: 0px;
+}
+
+#submitprogbutton {
+	position: relative;
+	top: 10px;
+	right: 110px;
+}
+
+#cancelprogbutton {
+	position: relative;
+	top: 262px;
+	left: 100px;
+}
+
+#resetbtn {
+	position: relative;
+	top: 50px;
+}
+
+.cancelPopup, .submitPopup {
+	width: 200px;
+}

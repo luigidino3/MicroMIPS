@@ -1,0 +1,102 @@
+{% load staticfiles %}
+<link rel = "stylesheet" type = "text/css" href = "{% static 'simulator/homeStyle.css'%}"/>
+
+<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+
+<!--for pop-up menus-->
+<script type = "text/javascript">
+	function toggle_visibility(id) {
+		var e = document.getElementById(id);
+		if (e.style.display == 'block')
+			e.style.display = 'none';
+		else
+			e.style.display = 'block';
+	}
+</script>
+
+<body>
+	<h1>MIPS64 SIMULATOR</h1>
+	<h2>Caro | Chen | Dino</h2>
+	
+	<!--MENU-->
+	<div id = "menu">
+		<button onclick = "location.href = '{% url 'inputReg' %}'" id = "inputRegbtn">Input Value for Registers</button>
+		
+		<button href = "javascript:void(0)" onclick="toggle_visibility('inputValPopup_wrapper');" id = "inputValbtn">Input Value for Memory Data Segment</button>
+		<div id = "gotoInput">
+            <form action="{% url 'gotoMemory' %}" method="post">
+				{% csrf_token %}    
+				<button onclick="toggle_visibility('gotoMemPopup_wrapper');" id = "gotoMembtn">GOTO Memory</button> 
+				
+				<input type = "text" name="memoryHere" maxlength="4" value="0000">
+				<p id = "gotoprompt">Input values from 0000 - 1FFF only.</p>
+            </form>
+        </div>
+		
+		<button href = "javascript:void(0)" onclick="toggle_visibility('inputProgPopup_wrapper');" id = "inputProgbtn">Input Program</button>
+		
+		<button onclick = "location.href = '{% url 'pipeline' %}'" id = "pipelinebtn">Pipeline</button>
+		
+		<button onclick = "location.href = '{% url 'home' %}'" id = "resetbtn">Reset</button>
+	</div>
+	
+	<!--InputValue for Data Segment Popup-->
+	<div id = "inputValPopup_wrapper">
+		<div id = "inputValPopup_container">
+			<h3>Input Value for Data Segment</h3>
+			
+			<div id = "inputValField">
+				<form action="{% url 'changeDataMemory' %}" method="post" id = "inputValForm">
+					{% csrf_token %}
+					Memory Address: <input id = "memoryaddressform" type = "text" name="memoryName" maxlength="4" value="0000">
+					<p id = "inputvalprompt">Input values from 0000 - 0FFF only.</p>
+					<br>
+					
+					Value: <input id = "valueform" type = "text" name="memoryValue" maxlength="16" value="0000000000000000">
+					
+					<button class ="submitPopup" id = "submitvalbutton">SUBMIT</button>
+				</form>
+			</div>
+			
+			<button onclick = "location.href = '{% url 'home' %}'" class ="cancelPopup" id = "cancelvalbutton">CANCEL</button>
+		</div>
+	</div>
+	
+	<!--GOTO Memory Popup-->
+    {% if request.session.goto == 1 %}
+		<div id = "gotoMemPopup_wrapper" style="display:block;">
+    {% else %}
+    	<div id = "gotoMemPopup_wrapper" style="display:none;">
+    {% endif %}
+			
+		<div id = "gotoMemPopup_container">
+			<h3>GOTO Memory</h3>
+			
+			<div id = "memoryAddressField">
+                    {% if mips %}
+					Value of Address {{ memory }}: {{ mips.value }} 
+                    {% elif data %}
+                    Value of Address {{ memory }}: {{ data.value }} 
+                    {% endif %}
+			</div>
+
+			<button onclick = "location.href = '{% url 'home' %}'" class = "cancelPopup">RETURN</button>
+		</div>
+	</div>
+	</div>
+	
+	<!--Input Program Popup-->
+	<div id = "inputProgPopup_wrapper">
+		<div id = "inputProgPopup_container">
+			<h3>Input MIPS64 Program</h3>
+            
+			<form action="{% url 'programRegistered' %}" method="post">
+				{% csrf_token %}
+				<textarea name="mipsProgram" Placeholder="#Start code here..."></textarea>
+				<button class ="submitPopup" id = "submitprogbutton">SUBMIT</button>
+            </form>
+			
+			<button onclick = "location.href = '{% url 'home' %}'" class ="cancelPopup" id = "cancelprogbutton">CANCEL</button> 
+		</div>
+	</div>
+</body>
