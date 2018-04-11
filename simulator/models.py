@@ -77,7 +77,6 @@ class WB(models.Model):
 	cycle = models.IntegerField(default=0)
 	row = models.IntegerField(default=0)
 	result = models.CharField(blank=True, null=True, max_length=16)
-	
 	def __int__(self):
 		return self.name
 	

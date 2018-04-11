@@ -313,6 +313,7 @@ def reset(request):
         x.save()
     data = DataSegment.objects.all()
     request.session['goto'] = 0
+    request.session['programCount'] = 0
     reset = None
     for x in clear:
         if x.memoryType == 0:
@@ -483,6 +484,7 @@ def programRegistered(request):
     request.session['goto'] = 0
     programLines = [l for l in request.POST['mipsProgram'].split("\n") if l]
     programMemory = MipsProgram.objects.all().order_by('id')[:len(programLines)]
+    request.session['programCount'] = len(programLines)
     x = 0
     for y in programMemory:
         y.value = programLines[x]
@@ -494,5 +496,5 @@ def programRegistered(request):
     return render(request, 'simulator/home.html')
 
 def pipeline(request):
-    
+    programMips = MipsProgram.objects.all().order_by('id')[:request.session['programCount']]
 	return render(request, 'simulator/pipeline.html', context)
