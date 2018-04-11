@@ -299,8 +299,11 @@ def opcode(code):
 
         elif re.search(r'BC',code):
             opcode = '110010'
-            final2 = '0'
+            final2 = 'n/a'
             print("OPCODE in Binary: " + opcode + "26-bit offset")
+
+        else:
+            final2 = "n/a"
     else:
        print("Syntax error!")
        final2 = "Error"
@@ -447,7 +450,7 @@ def IDFunction(code):
             newID = ID(cycle=2, row=1, ir=code.opcode,a=rs.zfill(16),b=rt.zfill(16),imm=code.opcode[4:].zfill(16))
             newID.save()
 
-    elif "LD" or "SD" in code.value:
+    elif "LD" in code.value:
         rt,offset,base = loadstoreChecker(code.value)
         rt,offset,base = loadstoreCleaner(rt,offset,base)
 
@@ -471,7 +474,32 @@ def IDFunction(code):
         else:        
             newID = ID(cycle=2, row=1, ir=code.opcode,a=base.zfill(16),b=rt.zfill(16),imm=offset.zfill(16))
             newID.save()
-       
+
+    elif "SD" in code.value:
+        rt,offset,base = loadstoreChecker(code.value)
+        rt,offset,base = loadstoreCleaner(rt,offset,base)
+
+        for register in all_registers:
+            if rt == register.name[1:]:
+                rt = register.value
+            if base == register.name[1:]:
+                base = register.value
+
+        if VID != None:
+            if VStall != None:
+                if VStall.cycle > VID.cycle:
+                    newID = ID(cycle=VStall.cycle+1, row=VStall.row,ir=code.opcode,a=base.zfill(16),b=rt.zfill(16),imm=offset.zfill(16))
+                    newID.save()
+                else:
+                    newID = ID(cycle=VID.cycle+1, row=VID.row+1,ir=code.opcode,a=base.zfill(16),b=rt.zfill(16),imm=offset.zfill(16))
+                    newID.save()
+            else:
+                newID = ID(cycle=VID.cycle+1, row=VID.row+1,ir=code.opcode,a=base.zfill(16),b=rt.zfill(16),imm=offset.zfill(16))
+                newID.save()
+        else:        
+            newID = ID(cycle=2, row=1, ir=code.opcode,a=base.zfill(16),b=rt.zfill(16),imm=offset.zfill(16))
+            newID.save()
+              
 
 def EXFunction(code):
     all_registers = Register.objects.all()
@@ -480,8 +508,10 @@ def EXFunction(code):
         VEX = EX.objects.latest('id')
     except: 
         VEX = None
-    VID = ID.objects.latest('id')
-
+    try:
+        VID = ID.objects.latest('id')
+    except:
+        VID = None
     if "DADDIU" in code.value:
         rt,rs,imm = immediateChecker(code.value)
         rt,rs,imm = cleaner(rt,rs,imm)
@@ -907,57 +937,107 @@ def WBFunction(code):
         else:
             newWB = WB(cycle=5, row=1,result="N/A")
             newWB.save()
-def reset(request):
-    registers = Register.objects.all()
-    clear = MemoryClearer.objects.all()
-    for x in registers:
-        x.value = "0000000000000000"
-        x.save()
-    data = DataSegment.objects.all()
-    request.session['goto'] = 0
-    request.session['programCount'] = 0
-    reset = None
-    for x in clear:
-        if x.memoryType == 0:
-            try:
-                reset = DataSegment.objects.get(name = x.name)
-                reset.value = "0000000000000000"
-                reset.save()
-            except DataSegment.DoesNotExist:
-                reset = None
-        else:
-            try:
-                reset = MipsProgram.objects.get(name = x.name)
-                reset.value = "0000000000000000"
-                reset.opcode = ""
-                reset.save()
-            except MipsProgram.DoesNotExist:
-                reset = None
-    while MemoryClearer.objects.count():
-        MemoryClearer.objects.all()[0].delete()
-    VIF = IF.objects.all()
-    VID = ID.objects.all()
-    VEX = EX.objects.all()
-    VMEM = MEM.objects.all()
-    VWB = WB.objects.all()
-    VStall = Stall.objects.all()
-    VTable = Table.objects.all()
-    for x in VIF:
-        x.delete()
-    for x in VID:
-        x.delete()
-    for x in VEX:
-        x.delete()
-    for x in VMEM:
-        x.delete()
-    for x in VWB:
-        x.delete()
-    for x in VStall:
-        x.delete()
-    for x in VTable:
-        x.delete()
-    return render(request, 'simulator/home.html')  
 
+#    for x in data:
+#        x.value = "0000000000000000"
+#        x.save()
+#    mips = MipsProgram.objects.all()
+#    for x in mips:
+#        x.value = "0000000000000000"
+#        x.save()
+#    while MemoryClearer.objects.count():
+#        MemoryClearer.objects.all()[0].delete()
+#    return render(request, 'simulator/home.html')
+#    memory = DataSegment.objects.all()    
+#    for x in memory:
+#        x.value = "00"
+#        x.save()
+#    y = 0
+#    a = 0
+#    b = 0
+#    c = 0
+#    first = 0
+#    second = 0
+#    third = 0
+#    while y < 4096:
+#        if a == 0:
+#            first = str(a)
+#        else:
+#            first = hex(a).lstrip("0x").upper()
+#        if b == 0:
+#            second = str(b)
+#        else:
+#            second = hex(b).lstrip("0x").upper()
+#        if c == 0:
+#            third = str(c)
+#        else:
+#            third = hex(c).lstrip("0x").upper()
+#            
+#        memoryname = "1" + third + second + first
+#        new_memory = MipsProgram(name=memoryname, value="00")
+#        new_memory.save()
+#        if a <= 14:
+#            a = a + 1
+#        elif b <=14 and a == 15:
+#            a = 0
+#            b = b + 1
+#        elif c <= 14 and b == 15 and a == 15:
+#            a = 0
+#            b = 0
+#            c = c + 1
+#        y = y + 1
+#    y = 0
+#    a = 0
+#    while y < 1024:
+#        new_memory = MipsProgram(name=a, value="0000000000000000")
+#        new_memory.save()
+#        a = a + 4
+#        y = y + 1
+    
+def opForBC(programMips):
+    for w in programMips:
+        if "BGTZ" in w.value:
+            num2 = 0
+            opcodz = '1C20'
+            temp2 = w.value[8:]
+            temp2 = temp2 + ":"
+            print(temp2)
+            num1 = w.name
+            print(num1)
+            print(temp2)
+
+            for l in programMips:
+                if temp2 in l.value:
+                    num2 = l.name
+                print("pumasok")
+            half = num2 - num1
+            half = half/4 - 1
+            print(half)
+            half = int(half)
+            half = str(half).zfill(4)
+            print(half)
+            final = opcodz + half
+            print(final)
+            w.opcode = final
+            w.save()
+
+    for i in programMips:
+        if "BC" in i.value:
+            opcod = 'C8'
+            temp = i.value[2:]
+            temp = temp.strip()
+            temp = temp + ":"
+            num1 = i.name
+            for x in programMips:
+                if temp in x.value:
+                    num2 = x.name
+            half = num2 - num1
+            half = half/4 - 1
+            half = int(half)
+            half = str(half).zfill(7)
+            final = opcod + half
+            i.opcode = final
+            i.save()            
 def home(request):
     request.session['goto'] = 0
     return render(request, 'simulator/home.html')
@@ -1026,6 +1106,8 @@ def changeDataMemory(request):
 
 def inputReg(request):
     request.session['goto'] = 0
+#    while MipsProgram.objects.count():
+#        MipsProgram.objects.all()[0].delete()
     firsthalf_registers = Register.objects.all()[:10]
     secondhalf_registers = Register.objects.all()[10:20]
     thirdhalf_registers = Register.objects.all()[20:]
@@ -1052,45 +1134,60 @@ def programRegistered(request):
 
     programMips = MipsProgram.objects.all().order_by('id')[:request.session['programCount']]
 
-    for i in programMips:
-        if "BC" in i.value:
-            opcod = 'C8'
-            temp = i.value[2:]
-            temp = temp.strip()
-            temp = temp + ":"
-            num1 = i.name
-            for x in programMips:
-                if temp in x.value:
-                    num2 = x.name
-            half = num2 - num1
-            half = half/4 - 1
-            half = int(half)
-            half = str(half).zfill(7)
-            final = opcod + half
-            i.opcode = final
-            i.save()
-        elif "BGTZ" in i.value:
-            opcod = '1C2'
-            temp = i.value[4:]
-            temp = temp.strip()
-            temp = temp + ":"
-            num1 = i.name
-            print(num1)
-            print(temp)
-            num2 = 0
-            for x in programMips:
-                if temp in x.value:
-                    num2 = x.name
-            print
-            half = num2 - num1
-            half = half/4 - 1
-            half = int(half)
-            half = str(half).zfill(5)
-            final = opcod + half
-            print(final)
-            i.opcode = final
-            i.save()            
+    opForBC(programMips)
+
     return render(request, 'simulator/home.html')
+
+def reset(request):
+    registers = Register.objects.all()
+    clear = MemoryClearer.objects.all()
+    for x in registers:
+        x.value = "0000000000000000"
+        x.save()
+    data = DataSegment.objects.all()
+    request.session['goto'] = 0
+    request.session['programCount'] = 0
+    reset = None
+    for x in clear:
+        if x.memoryType == 0:
+            try:
+                reset = DataSegment.objects.get(name = x.name)
+                reset.value = "0000000000000000"
+                reset.save()
+            except DataSegment.DoesNotExist:
+                reset = None
+        else:
+            try:
+                reset = MipsProgram.objects.get(name = x.name)
+                reset.value = "0000000000000000"
+                reset.opcode = ""
+                reset.save()
+            except MipsProgram.DoesNotExist:
+                reset = None
+    while MemoryClearer.objects.count():
+        MemoryClearer.objects.all()[0].delete()
+    VIF = IF.objects.all()
+    VID = ID.objects.all()
+    VEX = EX.objects.all()
+    VMEM = MEM.objects.all()
+    VWB = WB.objects.all()
+    VStall = Stall.objects.all()
+    VTable = Table.objects.all()
+    for x in VIF:
+        x.delete()
+    for x in VID:
+        x.delete()
+    for x in VEX:
+        x.delete()
+    for x in VMEM:
+        x.delete()
+    for x in VWB:
+        x.delete()
+    for x in VStall:
+        x.delete()
+    for x in VTable:
+        x.delete()
+    return render(request, 'simulator/home.html')  
 
 def pipeline(request):
     lastWB = WB.objects.last()
