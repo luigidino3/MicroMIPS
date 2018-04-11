@@ -32,44 +32,46 @@ class MemoryClearer(models.Model):
         return self.name
 	
 class IF(models.Model):
-	cycle = models.IntegerField(default=0)
-	row = models.IntegerField(blank=True, null=True, max_length=16)
-	ir = models.CharField(blank=True, null=True, max_length=16)
-	pc = models.CharField(blank=True, null=True, max_length=16)
-	
-	def __int__(self):
-		return self.name
+    cycle = models.IntegerField(default=0)
+    row = models.IntegerField(blank=True, null=True, max_length=16)
+    ir = models.CharField(blank=True, null=True, max_length=16)
+    pc = models.CharField(blank=True, null=True, max_length=16)
+    
+    def __int__(self):
+        return self.name
 	
 class ID(models.Model):
-	cycle = models.IntegerField(default=0)
-	row = models.IntegerField(default=0)
-	a = models.CharField(blank=True, null=True, max_length=16)
-	b = models.CharField(blank=True, null=True, max_length=16)
-	imm = models.CharField(blank=True, null=True, max_length=16)
-	npc = models.CharField(blank=True, null=True, max_length=16)
+    cycle = models.IntegerField(default=0)
+    row = models.IntegerField(default=0)
+    a = models.CharField(blank=True, null=True, max_length=16)
+    b = models.CharField(blank=True, null=True, max_length=16)
+    imm = models.CharField(blank=True, null=True, max_length=16)
+    ir = models.CharField(blank=True, null=True, max_length=16)
 	
-	def __int__(self):
-		return self.name
+    def __int__(self):
+        return self.name
 	
 class EX(models.Model):
-	cycle = models.IntegerField(default=0)
-	row = models.IntegerField(default=0)
-	aluoutput = models.CharField(blank=True, null=True, max_length=16)
-	cond = models.CharField(blank=True, null=True, max_length=16)
-	b = models.CharField(blank=True, null=True, max_length=16)
-	
-	def __int__(self):
-		return self.name
+    cycle = models.IntegerField(default=0)
+    row = models.IntegerField(default=0)
+    aluoutput = models.CharField(blank=True, null=True, max_length=16)
+    cond = models.CharField(blank=True, null=True, max_length=16)
+    b = models.CharField(blank=True, null=True, max_length=16)
+    ir = models.CharField(blank=True, null=True, max_length=16)
+    
+    def __int__(self):
+        return self.name
 	
 class MEM(models.Model):
-	cycle = models.IntegerField(default=0)
-	row = models.IntegerField(default=0)
-	lmd = models.CharField(blank=True, null=True, max_length=16)
-	aluoutput = models.CharField(blank=True, null=True, max_length=16)
-	memoryrange = models.CharField(blank=True, null=True, max_length=32)
-	
-	def __int__(self):
-		return self.name
+    cycle = models.IntegerField(default=0)
+    row = models.IntegerField(default=0)
+    lmd = models.CharField(blank=True, null=True, max_length=16)
+    aluoutput = models.CharField(blank=True, null=True, max_length=16)
+    memoryrange = models.CharField(blank=True, null=True, max_length=32)
+    ir = models.CharField(blank=True, null=True, max_length=16)
+    
+    def __int__(self):
+        return self.name
 	
 class WB(models.Model):
 	cycle = models.IntegerField(default=0)
