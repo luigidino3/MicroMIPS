@@ -32,8 +32,8 @@ class MemoryClearer(models.Model):
         return self.name
 	
 class IF(models.Model):
-	name = models.IntegerField(default=0)
-	opcode = models.CharField(blank=True, null=True, max_length=8)
+	cycle = models.IntegerField(default=0)
+	row = models.IntegerField(default=0)
 	npc = models.IntegerField(default=0)
 	pc = models.IntegerField(default=0)
 	
@@ -42,7 +42,7 @@ class IF(models.Model):
 	
 class ID(models.Model):
 	cycle = models.IntegerField(default=0)
-    row = models.IntegerField(default=0)
+	row = models.IntegerField(default=0)
 	a = models.CharField(default=0)
 	b = models.CharField(default=0)
 	imm = models.CharField(default=0)
@@ -53,7 +53,7 @@ class ID(models.Model):
 	
 class EX(models.Model):
 	cycle = models.IntegerField(default=0)
-    row = models.IntegerField(default=0)
+	row = models.IntegerField(default=0)
 	aluoutput = models.CharField(default=0)
 	cond = models.CharField(default=0)
 	b = models.CharField(default=0)
@@ -63,7 +63,7 @@ class EX(models.Model):
 	
 class MEM(models.Model):
 	cycle = models.IntegerField(default=0)
-    row = models.IntegerField(default=0)
+	row = models.IntegerField(default=0)
 	lmd = models.CharField(default=0)
 	aluoutput = models.CharField(default=0)
 	memoryrange = models.CharField(blank=True, null=True, max_length=8)
@@ -73,7 +73,7 @@ class MEM(models.Model):
 	
 class WB(models.Model):
 	cycle = models.IntegerField(default=0)
-    row = models.IntegerField(default=0)
+	row = models.IntegerField(default=0)
 	result = models.CharField(default=0)
 	
 	def __int__(self):
@@ -81,7 +81,7 @@ class WB(models.Model):
 	
 class Stall(models.Model):
 	cycle = models.IntegerField(default=0)
-    row = models.IntegerField(default=0)
+	row = models.IntegerField(default=0)
 	
 	def __int__(self):
 		return self.name
