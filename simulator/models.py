@@ -88,15 +88,17 @@ class Stall(models.Model):
 		return self.name
 
 class Table(models.Model):
-	CIF = models.IntegerField(default=0)
-	CID = models.IntegerField(default=0)
-	CEX = models.IntegerField(default=0)
-	CMEM = models.IntegerField(default=0)
-	CWB = models.IntegerField(default=0)
-	CYCLE = models.IntegerField(default=0)
-	CSTALL = models.IntegerField(default=0)
-	POSITION = models.IntegerField(default=0)
-	SPACE = models.IntegerField(default=0)
-
-	def __init__(self):
-		return self.name
+    CIF = models.IntegerField(default=0)
+    CID = models.IntegerField(default=0)
+    CEX = models.IntegerField(default=0)
+    CMEM = models.IntegerField(default=0)
+    CWB = models.IntegerField(default=0)
+    ROW = models.IntegerField(default=0)
+    CSTALL = models.IntegerField(default=0)
+    AFTER = models.IntegerField(default=0)
+    AFTERSPACE = models.IntegerField(default=0)
+    BEFORE = models.IntegerField(default=0)
+    BEFORESPACE = models.CharField(blank=True, null=True, max_length=16)
+    
+    def __int__(self):
+        return self.ROW

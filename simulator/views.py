@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
-from .models import Register, DataSegment, MipsProgram, MemoryClearer, IF, ID, EX, MEM, WB, Stall
+from .models import Register, DataSegment, MipsProgram, MemoryClearer, IF, ID, EX, MEM, WB, Stall, Table
 import re
 
 def immediateChecker(code):
@@ -417,6 +417,7 @@ def reset(request):
             try:
                 reset = MipsProgram.objects.get(name = x.name)
                 reset.value = "0000000000000000"
+                reset.opcode = ""
                 reset.save()
             except MipsProgram.DoesNotExist:
                 reset = None
@@ -601,7 +602,64 @@ def pipeline(request):
         EXFunction(x)
         MEMFunction(x)
         WBFunction(x)
-    return render(request, 'simulator/pipeline.html')
+    lastWB = WB.objects.last()
+    rowCounter = 1
+    while rowCounter <= request.session['programCount']:
+        VIF = 1
+        VID = 1
+        VEX = 1
+        VMEM = 1
+        VWB = 1
+        VSTALL = 1
+        VAFTER = 0
+        VAFTERSPACE = 0
+        VBEFORE = 0
+        VBEFORESPACE = ""
+        try:
+            BVIF = IF.objects.get(row = rowCounter)
+            if BVIF.cycle > 1:
+                VBEFORE = 1
+                VBEFORESPACES = BVIF.cycle - 1
+                for i in range(1,VBEFORESPACES+1):
+                    VBEFORESPACE += "a"
+        except:
+            VIF = 0
+        try:
+            BVID = ID.objects.get(row = rowCounter)
+        except:
+            VID = 0
+        try:
+            BVEX = EX.objects.get(row = rowCounter)
+        except:
+            VEX = 0
+        try:
+            BVMEM = MEM.objects.get(row = rowCounter)
+        except:
+            VMEM = 0
+        try:
+            BVWB = WB.objects.get(row = rowCounter)
+            if BVWB.cycle < lastWB.cycle:
+                VAFTER = 1
+                VAFTERSPACE = lastWB.cycle - BVWB.cycle
+        except:
+            VWB = 0
+        try:
+            BVSTALL = STALL.objects.filter(row = rowCounter)
+        except:
+            VSTALL = 0
+        newTable = Table(CIF=VIF, CID=VID, CEX=VEX, CMEM=VMEM, CWB=VWB, ROW=rowCounter, CSTALL=VSTALL, AFTER=VAFTER, AFTERSPACE=VAFTERSPACE, BEFORE=VBEFORE, BEFORESPACE=VBEFORESPACE)
+        newTable.save()
+        rowCounter = rowCounter +1 
+    all_table = Table.objects.all()
+    listCycle = []
+    for i in range(1, lastWB.cycle+1):
+        listCycle.append(str(i))
+    context ={
+        'table': all_table,
+        'lastCycle': listCycle,
+        'programMips':programMips
+    }
+    return render(request, 'simulator/pipeline.html', context)
 
 def purge(request):
     VIF = IF.objects.all()
@@ -610,6 +668,7 @@ def purge(request):
     VMEM = MEM.objects.all()
     VWB = WB.objects.all()
     VStall = Stall.objects.all()
+    VTable = Table.objects.all()
     for x in VIF:
         x.delete()
     for x in VID:
@@ -621,5 +680,7 @@ def purge(request):
     for x in VWB:
         x.delete()
     for x in VStall:
+        x.delete()
+    for x in VTable:
         x.delete()
     return render(request, 'simulator/home.html')

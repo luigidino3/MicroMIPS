@@ -26,7 +26,7 @@
 	<div id = "programTable">
 		<table>
 			<tr><th>Program</th></tr>
-			{% for mipsprogram in program %}
+			{% for mipsprogram in programMips %}
 				<tr> <td> {{ mipsprogram.value }} </td> </tr>
 			{% endfor %}
 		</table>
@@ -36,25 +36,52 @@
 		<table id = "clockCycles">
 			<!--temporary, clock cycles should be dynamic-->
 			<tr>
-				<th>Cycle 1</th>
-				<th>Cycle 2</th>
-				<th>Cycle 3</th>
-				<th>Cycle 4</th>
-				<th>Cycle 5</th>
-
-
+                {% for x in lastCycle %}
+				    <th>Cycle {{x}}</th>
+                {% endfor %}
 				<!--add <th> in the next clock cycle-->
 			</tr>
-
+            {% for x in table %}
 			<tr>
-				<td>IF</td>
-				<td>ID</td>
-				<td>EX</td>
-				<td>MEM</td>
-				<td>WB</td>
-				<!--add <td> in the next clock cycle-->
+                {% if x.BEFORE == 1|add:"0" %}
+                {% for y in x.BEFORESPACE %}
+                    <td></td>
+                {% endfor %}
+<!--
+                <script>
+                function Spacer(){
+                alert("HEY");
+                var i;
+                var a = parseInt({{x.BEFORESPACE}});
+                    for (i = 0; i < 3; i++) {
+                    text += "<td></td>";
+                    }
+                    document.getElementById("demo").innerHTML = text;
+                }
+                </script>
+-->
+                {% endif %}
+                {% if x.CIF == 1 %}
+                <td>IF</td>
+                {% endif %}
+                {% if x.CSTALL == 1 %}
+                <td> * </td>
+                <td> * </td>
+                {% endif %}
+                {% if x.CID == 1 %}
+                <td>ID</td>
+                {% endif %}
+                {% if x.CEX == 1 %}
+                <td>EX</td>
+                {% endif %}
+                {% if x.CMEM == 1 %}
+                <td>MEM</td>
+                {% endif %}
+                {% if x.CWB == 1 %}
+                <td>WB</td>
+                {% endif %}
 			</tr>
-
+            {% endfor %}
 		</table>
 	</div>
 </div>
