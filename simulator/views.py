@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
-from .models import Register, DataSegment, MipsProgram, MemoryClearer, IF, ID, EX, MEM, WB, Stall, Table
+from .models import Register, DataSegment, MipsProgram, MemoryClearer, IF, ID, EX, MEM, WB, Stall, Table, memoryComparer
 import re
 
 def immediateChecker(code):

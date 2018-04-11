@@ -102,3 +102,10 @@ class Table(models.Model):
     
     def __int__(self):
         return self.ROW
+
+class memoryComparer(models.Model):
+    nameInt = models.IntegerField(default=0)
+    nameHex = models.CharField(max_length=4)
+    
+    def __init__(self):
+        return self.nameHex
