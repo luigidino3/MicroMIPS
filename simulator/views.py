@@ -497,4 +497,4 @@ def programRegistered(request):
 
 def pipeline(request):
     programMips = MipsProgram.objects.all().order_by('id')[:request.session['programCount']]
-	return render(request, 'simulator/pipeline.html', context)
+    return render(request, 'simulator/pipeline.html', context)
