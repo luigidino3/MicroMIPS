@@ -1261,6 +1261,11 @@ def pipeline(request):
         'registers' : Register.objects.all(),
 		'datasegment' : DataSegment.objects.all(),
         'fullProgram': MipsProgram.objects.all(),
+        'VIF' : IF.objects.all(),
+        'VID' : ID.objects.all(),
+        'VEX' : EX.objects.all(),
+        'VMEM' : MEM.objects.all(),
+        'VWB' : WB.objects.all(),
     }
     return render(request, 'simulator/pipeline.html', context)
 
@@ -1305,6 +1310,11 @@ def finish(request):
         'registers' : Register.objects.all(),
 		'datasegment' : DataSegment.objects.all(),
         'fullProgram': MipsProgram.objects.all(),
+        'VIF' : IF.objects.all(),
+        'VID' : ID.objects.all(),
+        'VEX' : EX.objects.all(),
+        'VMEM' : MEM.objects.all(),
+        'VWB' : WB.objects.all(),
     }
     return render(request, 'simulator/pipeline.html', context)
 
@@ -1323,5 +1333,10 @@ def nextCycle(request, nextCycle):
         'registers' : Register.objects.all(),
 		'datasegment' : DataSegment.objects.all(),
         'fullProgram': MipsProgram.objects.all(),
+        'VIF' : IF.objects.all(),
+        'VID' : ID.objects.all(),
+        'VEX' : EX.objects.all(),
+        'VMEM' : MEM.objects.all(),
+        'VWB' : WB.objects.all(),
     }
     return render(request, 'simulator/pipeline.html', context)
