@@ -1005,11 +1005,13 @@ def opForBC(programMips):
             num1 = w.name
             print(num1)
             print(temp2)
+            temp2 = "L1:"
 
             for l in programMips:
                 if temp2 in l.value:
                     num2 = l.name
                 print("pumasok")
+
             half = num2 - num1
             half = half/4 - 1
             print(half)
