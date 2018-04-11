@@ -2,83 +2,190 @@
 <html>
 <link rel = "stylesheet" type = "text/css" href = "{% static 'simulator/pipelineStyle.css'%}"/>
 
+<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+	
+<!--for popups-->
+<script type = "text/javascript">
+	function toggle_visibility(id) {
+		var e = document.getElementById(id);
+		if (e.style.display == 'block')
+			e.style.display = 'none';
+		else
+			e.style.display = 'block';
+	}
+</script>
+
 <h1>Pipeline Map</h1>
 <p>S12-6: BGTZ/BC (Pipeline Freeze)</p>
 
-<div id = "datatable">
-	{% csrf_token %}
-	<table id = "datasegmenttable">
-		<tr class = "tablehead">
-			<th> Address </th>
-			<th> Value </th>
-		</tr>
-		
-		{% for datasegment in datasegment %}
-			<tr>
-				<td> {{ datasegment.name }} </td>
-				<td> {{ datasegment.value }} </td>
-			</tr>
-		{% endfor %}
-	</table>
-</div>
+{% csrf_token %}
 
-<div id = "mainTable">
-	<div id = "programTable">
-		<table>
-			<tr><th>Program</th></tr>
+<div id = "dataProgramRegTables">
+	<div id = "progtable">
+		<table id = "programtable">
+			<tr>
+				<th> Address </th>
+				<th> Code </th>
+			</tr>
+            <tr>
+            {% for mipsName in mipsList %}
+                <td style="visibility:visible;">{{ mipsName }}</td>
+            {% endfor %}
 			{% for mipsprogram in programMips %}
-				<tr> <td> {{ mipsprogram.value }} </td> </tr>
+				<td style="visibility:visible;"> {{ mipsprogram.value }} </td>
+			{% endfor %}
+            </tr>
+		</table>
+	</div>
+	
+	<div id = "datatable">
+		<table id = "datasegmenttable">
+			<tr>
+				<th style="visibility:visible;"> Address </th>
+				<th style="visibility:visible;"> Data </th>
+			</tr>
+
+			{% for datasegment in datasegment %}
+				<tr>
+					<td style="visibility:visible;"> {{ datasegment.name }} </td>
+					<td style="visibility:visible;"> {{ datasegment.value }} </td>
+				</tr>
 			{% endfor %}
 		</table>
 	</div>
+	
+	<div id = "regtable">
+		<table id = "registertable">
+			<tr>
+				<th> Register </th>
+				<th> Value </th>
+			</tr>
 
+			{% for register in registers %}
+				<tr>
+					<td style="visibility:visible;"> {{ register.name }} </td>
+					<td style="visibility:visible;"> {{ register.value }} </td>
+				</tr>
+			{% endfor %}
+		</table>
+	</div>
+</div>
+
+
+<div id = "pipeTable">
+	<div id = "pipelineTable">
+		<table>
+			<tr><th>Program</th></tr>
+			{% for mipsprogram in programMips %}
+				<tr> <td style="visibility:visible;"> {{ mipsprogram.value }} </td> </tr>
+			{% endfor %}
+		</table>
+	</div>
+    <style type="text/css">
+         td {
+            visibility:hidden;
+        }
+    </style>
+    <style type="text/css">
+        td:nth-child(-n+{{request.session.nextCycle}}) {
+            visibility:visible;
+        }
+    </style>
 	<div id = "clockCycleTable">
-		<table id = "clockCycles">
-			<!--temporary, clock cycles should be dynamic-->
+		<table id="clockCycles">
 			<tr>
                 {% for x in lastCycle %}
 				    <th>Cycle {{x}}</th>
                 {% endfor %}
-				<!--add <th> in the next clock cycle-->
-			</tr>
+            </tr>
             {% for x in table %}
 			<tr>
                 {% if x.BEFORE == 1|add:"0" %}
                 {% for y in x.BEFORESPACE %}
                     <td></td>
                 {% endfor %}
-<!--
-                <script>
-                function Spacer(){
-                alert("HEY");
-                var i;
-                var a = parseInt({{x.BEFORESPACE}});
-                    for (i = 0; i < 3; i++) {
-                    text += "<td></td>";
-                    }
-                    document.getElementById("demo").innerHTML = text;
-                }
-                </script>
--->
                 {% endif %}
+                
                 {% if x.CIF == 1 %}
-                <td>IF</td>
+                <td>
+                    <div href="javascript:void(0)" onclick="toggle_visibility('IFpopup');">
+                        IF
+                        <div id = "IFpopup">
+                            IR = 
+                            <br>
+                            PC = 
+                        </div>
+                    </div>
+				</td>
                 {% endif %}
+                
                 {% if x.CSTALL == 1 %}
-                <td> * </td>
-                <td> * </td>
+                <td><div> * </div></td>
+                <td><div> * </div></td>
                 {% endif %}
+                
                 {% if x.CID == 1 %}
-                <td>ID</td>
+                <td>
+                    <div href="javascript:void(0)" onclick="toggle_visibility('IDpopup');">
+                        ID
+                        <div id = "IDpopup">
+                            IR = 
+                            <br>
+                            A = 
+                            <br>
+                            B = 
+                            <br>
+                            Imm = 
+                        </div>
+                    </div>
+                </td>
                 {% endif %}
+                
                 {% if x.CEX == 1 %}
-                <td>EX</td>
+                <td>
+                    <div href="javascript:void(0)" onclick="toggle_visibility('EXpopup');">
+                        EX
+                        <div id = "EXpopup">
+                            IR = 
+                            <br>
+                            B = 
+                            <br>
+                            ALU Output = 
+                            <br>
+                            Cond = 
+                        </div>
+                    </div>
+                </td>
                 {% endif %}
+                
                 {% if x.CMEM == 1 %}
-                <td>MEM</td>
+                <td>
+                    <div href="javascript:void(0)" onclick="toggle_visibility('MEMpopup');">
+                        MEM
+                        <div id = "MEMpopup">
+                            IR = 
+                            <br>
+                            LMD = 
+                            <br>
+                            ALU Output = 
+                            <br>
+                            Memory Range = 
+                        </div>
+                    </div>	
+                </td>
                 {% endif %}
+                
                 {% if x.CWB == 1 %}
-                <td>WB</td>
+                <td>
+                    <div href="javascript:void(0)" onclick="toggle_visibility('WBpopup');">
+                        WB
+                        <div id = "WBpopup">
+                            IR = 
+                            <br>
+                            Result = 
+                        </div>
+                    </div>
+                </td>
                 {% endif %}
 			</tr>
             {% endfor %}
@@ -87,8 +194,8 @@
 </div>
 
 <div id = "endbuttons">
-	<button  onclick = "location.href = '{% url 'purge' %}'">BACK</button>	
-	<button id = "nextbtn">NEXT CLOCK CYCLE</button>
-	<button id = "fullbtn">FINISH EXECUTION</button>
+	<button onclick = "location.href = '{% url 'purge' %}'">BACK</button>	
+	<button onclick="location.href = '{% url 'nextCycle' request.session.nextCycle %}'">NEXT CLOCK CYCLE</button>
+	<button onclick="location.href = '{% url 'finish' %}'">FINISH EXECUTION</button>
 </div>
 </html>

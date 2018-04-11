@@ -11,4 +11,6 @@ urlpatterns = [
     url(r'^programRegistered/', views.programRegistered, name='programRegistered'),
 	url(r'^pipeline/', views.pipeline, name = 'pipeline'),
     url(r'^clearedPipeline/', views.purge, name = 'purge'),
+    url(r'^finishPipeline/', views.finish, name = 'finish'),
+    url(r'^nextCycle/(?P<nextCycle>[0-9]+)', views.nextCycle, name = 'nextCycle'),
 ]

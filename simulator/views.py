@@ -1124,14 +1124,15 @@ def programRegistered(request):
     return render(request, 'simulator/home.html')
 
 def pipeline(request):
+    lastWB = WB.objects.last()
     programMips = MipsProgram.objects.all().order_by('id')[:request.session['programCount']]
-
     for x in programMips:
         IFFunction(x)
         IDFunction(x)
         EXFunction(x)
         MEMFunction(x)
         WBFunction(x)
+    request.session['nextCycle'] = 1
     lastWB = WB.objects.last()
     rowCounter = 1
     while rowCounter <= request.session['programCount']:
@@ -1184,14 +1185,24 @@ def pipeline(request):
     listCycle = []
     for i in range(1, lastWB.cycle+1):
         listCycle.append(str(i))
+    request.session['nextCycle'] = 1
+    mipsList = [["",""]]
+    first = 0
+    second = first + 1
+    for x in programMips: 
+        mipsList[[first]].append(hex(x.name)[2:].zfill(4).upper())
     context ={
         'table': all_table,
         'lastCycle': listCycle,
-        'programMips':programMips
+        'programMips':programMips, 
+        'registers' : Register.objects.all(),
+		'datasegment' : DataSegment.objects.all(),
+        'mipsList': mipsList
     }
     return render(request, 'simulator/pipeline.html', context)
 
 def purge(request):
+    request.session['nextCycle'] = 1
     VIF = IF.objects.all()
     VID = ID.objects.all()
     VEX = EX.objects.all()
@@ -1214,3 +1225,38 @@ def purge(request):
     for x in VTable:
         x.delete()
     return render(request, 'simulator/home.html')
+
+def finish(request):
+    
+    programMips = MipsProgram.objects.all().order_by('id')[:request.session['programCount']]
+    lastWB = WB.objects.last()
+    all_table = Table.objects.all()
+    listCycle = []
+    for i in range(1, lastWB.cycle+1):
+        listCycle.append(str(i))
+    request.session['nextCycle'] = lastWB.cycle
+    context ={
+        'table': all_table,
+        'lastCycle': listCycle,
+        'programMips':programMips, 
+        'registers' : Register.objects.all(),
+		'datasegment' : DataSegment.objects.all(),
+    }
+    return render(request, 'simulator/pipeline.html', context)
+
+def nextCycle(request, nextCycle):
+    request.session['nextCycle'] = request.session['nextCycle'] + 1
+    programMips = MipsProgram.objects.all().order_by('id')[:request.session['programCount']]
+    lastWB = WB.objects.last()
+    all_table = Table.objects.all()
+    listCycle = []
+    for i in range(1, lastWB.cycle+1):
+        listCycle.append(str(i))
+    context ={
+        'table': all_table,
+        'lastCycle': listCycle,
+        'programMips':programMips, 
+        'registers' : Register.objects.all(),
+		'datasegment' : DataSegment.objects.all(),
+    }
+    return render(request, 'simulator/pipeline.html', context)
