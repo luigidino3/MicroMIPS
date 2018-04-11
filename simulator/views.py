@@ -182,22 +182,4 @@ def programRegistered(request):
     return render(request, 'simulator/home.html')
 
 def pipeline(request):
-	request.session['goto'] = 0
-	i = 0
-	j = 0
-	
-	for mipsprogram in MipsProgram.objects.all():
-		line = MipsProgram.objects.get(name = j)
-		if line.value != "0000000000000000":
-			i = i + 1
-		j = j + 4
-
-	finalprogram = MipsProgram.objects.all()[:i]
-	#fix reverse order of objects (order_by doesn't seem to work for me?)
-
-	context = {
-		'program' : finalprogram,
-#		'register' : Register.objects.all(),
-		'datasegment' : DataSegment.objects.all(),
-	}
 	return render(request, 'simulator/pipeline.html', context)
