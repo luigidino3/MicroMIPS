@@ -86,3 +86,17 @@ class Stall(models.Model):
 	
 	def __int__(self):
 		return self.name
+
+class Table(models.Model):
+	CIF = models.IntegerField(default=0)
+	CID = models.IntegerField(default=0)
+	CEX = models.IntegerField(default=0)
+	CMEM = models.IntegerField(default=0)
+	CWB = models.IntegerField(default=0)
+	CYCLE = models.IntegerField(default=0)
+	CSTALL = models.IntegerField(default=0)
+	POSITION = models.IntegerField(default=0)
+	SPACE = models.IntegerField(default=0)
+
+	def __init__(self):
+		return self.name
