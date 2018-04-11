@@ -422,16 +422,24 @@ def reset(request):
                 reset = None
     while MemoryClearer.objects.count():
         MemoryClearer.objects.all()[0].delete()
-#    while IF.objects.count():
-#        IF.objects.all()[0].delete()
-#    while ID.objects.count():
-#        ID.objects.all()[0].delete()
-#    while EX.objects.count():
-#        EX.objects.all()[0].delete()
-#    while MEM.objects.count():
-#        MEM.objects.all()[0].delete()
-#    while WB.objects.count():
-#        WB.objects.all()[0].delete()
+    VIF = IF.objects.all()
+    VID = ID.objects.all()
+    VEX = EX.objects.all()
+    VMEM = MEM.objects.all()
+    VWB = WB.objects.all()
+    VStall = Stall.objects.all()
+    for x in VIF:
+        x.delete()
+    for x in VID:
+        x.delete()
+    for x in VEX:
+        x.delete()
+    for x in VMEM:
+        x.delete()
+    for x in VWB:
+        x.delete()
+    for x in VStall:
+        x.delete()
     return render(request, 'simulator/home.html')
 #    for x in data:
 #        x.value = "0000000000000000"
