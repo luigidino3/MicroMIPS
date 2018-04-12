@@ -108,14 +108,32 @@
                 
                 {% if x.CIF == 1 %}
                 <td>
-                    <div href="javascript:void(0)" onclick="toggle_visibility('IFpopup');">
+                    {% for y in VIF %}
+                                {% if y.row == x.ROW %}
+                <style>   
+                    #IFpopup{{y.row}} {
+                            display: none;
+                            background-color: #555;
+                            color: white;
+                            text-align: center;
+                            border-radius: 6px;
+                            padding: 5px;
+                            position: absolute;
+                            z-index: 1;
+                        }
+                </style> 
+                    <div href="javascript:void(0)" onclick="toggle_visibility('IFpopup{{y.row}}');">
                         IF
-                        <div id = "IFpopup">
-                            IR = 
-                            <br>
-                            PC = 
+                        <div id = "IFpopup{{y.row}}">
+                            
+                                    IR = {{ y.ir }}
+                                    <br>
+                                    PC = {{ y.pc }}
+                               
                         </div>
                     </div>
+                     {% endif %}
+                            {% endfor %}
 				</td>
                 {% endif %}
                 
@@ -126,65 +144,132 @@
                 
                 {% if x.CID == 1 %}
                 <td>
-                    <div href="javascript:void(0)" onclick="toggle_visibility('IDpopup');">
+                    {% for y in VID %}
+                                {% if y.row == x.ROW %}
+                    <style>   
+                    #IDpopup{{y.row}} {
+                            display: none;
+                            background-color: #555;
+                            color: white;
+                            text-align: center;
+                            border-radius: 6px;
+                            padding: 5px;
+                            position: absolute;
+                            z-index: 1;
+                        }
+                </style>
+                    <div href="javascript:void(0)" onclick="toggle_visibility('IDpopup{{y.row}}');">
                         ID
-                        <div id = "IDpopup">
-                            IR = 
-                            <br>
-                            A = 
-                            <br>
-                            B = 
-                            <br>
-                            Imm = 
+                        <div id = "IDpopup{{y.row}}">
+                            
+                                    IR = {{ y.ir }}
+                                    <br>
+                                    A = {{ y.a }}
+                                    <br>
+                                    B = {{ y.b }}
+                                    <br>
+                                    Imm = {{ y.imm }}
+                                
                         </div>
                     </div>
+                    {% endif %}
+                            {% endfor %}
                 </td>
                 {% endif %}
                 
                 {% if x.CEX == 1 %}
                 <td>
-                    <div href="javascript:void(0)" onclick="toggle_visibility('EXpopup');">
+                    {% for y in VEX %}
+                                {% if y.row == x.ROW %}
+                    <style>   
+                    #EXpopup{{y.row}} {
+                            display: none;
+                            background-color: #555;
+                            color: white;
+                            text-align: center;
+                            border-radius: 6px;
+                            padding: 5px;
+                            position: absolute;
+                            z-index: 1;
+                        }
+                </style>
+                    <div href="javascript:void(0)" onclick="toggle_visibility('EXpopup{{y.row}}');">
                         EX
-                        <div id = "EXpopup">
-                            IR = 
-                            <br>
-                            B = 
-                            <br>
-                            ALU Output = 
-                            <br>
-                            Cond = 
+                        <div id = "EXpopup{{y.row}}">
+                            
+                                    IR = {{ y.ir }}
+                                    <br>
+                                    B = {{ y.b }}
+                                    <br>
+                                    ALU Output = {{ y.aluoutput }}
+                                    <br>
+                                    Cond = {{ y.cond }}
+                                
                         </div>
                     </div>
+                    {% endif %}
+                            {% endfor %}
                 </td>
                 {% endif %}
                 
                 {% if x.CMEM == 1 %}
                 <td>
-                    <div href="javascript:void(0)" onclick="toggle_visibility('MEMpopup');">
+                    {% for y in VMEM %}
+                                {% if y.row == x.ROW %}
+                    <style>   
+                    #MEMpopup{{y.row}} {
+                            display: none;
+                            background-color: #555;
+                            color: white;
+                            text-align: center;
+                            border-radius: 6px;
+                            padding: 5px;
+                            position: absolute;
+                            z-index: 1;
+                        }
+                </style>
+                    <div href="javascript:void(0)" onclick="toggle_visibility('MEMpopup{{y.row}}');">
                         MEM
-                        <div id = "MEMpopup">
-                            IR = 
-                            <br>
-                            LMD = 
-                            <br>
-                            ALU Output = 
-                            <br>
-                            Memory Range = 
+                        <div id = "MEMpopup{{y.row}}">
+                                    IR = {{ y.ir }}
+                                    <br>
+                                    LMD = {{ y.lmd }}
+                                    <br>
+                                    ALU Output = {{ y.aluoutput }}
+                                    <br>
+                                    Memory Range = {{ y.memoryrange }}
                         </div>
-                    </div>	
+                    </div>
+                    {% endif %}
+                            {% endfor %}
                 </td>
                 {% endif %}
                 
                 {% if x.CWB == 1 %}
-                <td>
-                    <div href="javascript:void(0)" onclick="toggle_visibility('WBpopup');">
+                <td>{% for y in VWB %}
+                                {% if y.row == x.ROW %}
+                    <style>   
+                    #WBpopup{{y.row}} {
+                            display: none;
+                            background-color: #555;
+                            color: white;
+                            text-align: center;
+                            border-radius: 6px;
+                            padding: 5px;
+                            position: absolute;
+                            z-index: 1;
+                        }
+                </style>
+                    <div href="javascript:void(0)" onclick="toggle_visibility('WBpopup{{y.row}}');">
                         WB
-                        <div id = "WBpopup">
-                            IR = 
-                            <br>
-                            Result = 
+                        <div id = "WBpopup{{y.row}}">
+                            
+                                Result = {{ y.result }}
+                                
                         </div>
                     </div>
+                    {% endif %}
+                            {% endfor %}
                 </td>
                 {% endif %}
 			</tr>
